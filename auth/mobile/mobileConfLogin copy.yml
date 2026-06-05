@@ -1,0 +1,28 @@
+info:
+  name: mobileConfLogin copy
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: http://100.123.126.113:8002/auth/mob/confirm/login
+  headers:
+    - name: trust_token
+      value: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTFhNTc5YjEyMTE4ZDgyMWRmNDllOTQiLCJwdXJwb3NlIjoibG9naW4iLCJpYXQiOjE3ODAyMzE4NzQsImV4cCI6MTc4MDIzMjE3NH0.lIia_AtW0RqfVkybuLozeQbd0wyBtCKTVORWUpdSKP9hqTjrA8HoV4jQ1o-aBQwBm9TRrTSH4NB3J46dwcHPjOF_aANDfMgXv_PNI-7IPAqlhotKbZOfWQpuW2_M3EF-0kda3A4kxJNSqxne8mTT-d3X6S59YAipH65I_DdQ6m-KbhKmwGUznDIADJaO8yHa12nOBGF_UuPWHTFim2WtJrqnMq_Yl28F8vSXolD4G6Pp8AEen8ym1JWCDHAYVNTXKwwmu50bUjtZRSruzpf_u7C0s0QG3y64TwAc1cAuO6if366jtn_3CFbzH63pIfMmbjJfJgBb2VRi7HrMgiy1bw
+  body:
+    type: json
+    data: |-
+      {
+        "otp": "739243",
+        "deviceType": "Android 15",
+        "ipAddress": "100.123.126.113",
+        "loginLocation": "Kolkata, India",
+        "loginTimestamp": "9:40 IST 31st May 2026"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

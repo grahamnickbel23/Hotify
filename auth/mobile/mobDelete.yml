@@ -1,0 +1,18 @@
+info:
+  name: mobDelete
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: http://100.123.126.113:8002/auth/mob/delete
+  headers:
+    - name: access_token
+      value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTE4MzU4OGMyY2FhZTBiYjkxNDA1MGQiLCJyb2xlIjoidXNlciIsInByZWZhcmVuY2UiOiJkYXJrIiwiaWF0IjoxNzc5OTg1NzkzLCJleHAiOjE3Nzk5ODkzOTN9.r0AU2UnC7cTjP4UwVyK4R3QdjHMui0lkHe8xeDZw_3A
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

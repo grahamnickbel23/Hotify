@@ -1,0 +1,18 @@
+info:
+  name: mobNewToken
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: http://100.123.126.113:8002/auth/mob/token
+  headers:
+    - name: refresh_token
+      value: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6IkVoN3M3aGhVYXhCOE9PUnBIenhvbTFtcyIsImlhdCI6MTc4MDEwOTA5NywiZXhwIjoxNzgwNzEzODk3fQ.B3GIgwzFMSYF_pscZTXRknY0RBHH_U28p_LlHZ5NLFj6f_WQp3dWlXxSaayZfpquqiV5hhd8mqgA-kipQmlI9khkaAHKZW5qZvstMWVC_varUCVIR9nEYBCgRrk9TemH3h887M7LO6605peAJY_k6OSYj-l28PYL_L1mpj1utSJMcmbzJIoajqKVxFyu30y73w4aasUAp44rbewFGhFBrN-Pk9MklDJRDXte2_R5-pGEctPn10X5JxeItG1McIci7dnMDSsjXScvB5cR37pLFrEzWl0aucf1LCfC_--T66emjpN-6XD1yZoRVPazUN99oTSWj0Ybnqyl_YzvmF3suw
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,22 @@
+info:
+  name: addSong
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: http://100.123.126.113:8001/playlist/add/song
+  body:
+    type: json
+    data: |-
+      {
+        "playlistId": "6a22af125de598aa1d6872a2",
+        "songId": "6a22ace1244062cb75db585f"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

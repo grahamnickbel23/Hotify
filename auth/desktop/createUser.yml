@@ -1,0 +1,29 @@
+info:
+  name: createUser
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://100.123.126.113:8002/auth/signup
+  body:
+    type: json
+    data: |+
+      {
+          "email" : "dipanlahiri207official@gmail.com",
+          "password" : "ABC123",
+          "firstName" : "Graham",
+          "middeleName" : "Kumar",
+          "lastName" : "Nickbel",
+          "username" : "Graham2026",
+          "acessType" : "user",
+          "prefarence" : "dark"
+      }
+
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

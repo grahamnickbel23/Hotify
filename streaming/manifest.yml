@@ -1,0 +1,22 @@
+info:
+  name: manifest
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://100.123.126.113:8001/streaming/:songId/manifest.mpd
+  params:
+    - name: songId
+      value: 6a20e0c704e815d26d19abe5
+      type: path
+  body:
+    type: json
+    data: ""
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

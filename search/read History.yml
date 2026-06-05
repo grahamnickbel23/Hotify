@@ -1,0 +1,15 @@
+info:
+  name: read History
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://100.123.126.113:8001/search/read/history
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

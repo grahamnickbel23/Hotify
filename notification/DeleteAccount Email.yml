@@ -1,0 +1,27 @@
+info:
+  name: DeleteAccount Email
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: http://100.123.126.113:8003/email/send
+  body:
+    type: json
+    data: |-
+      {
+          "target": "dipanlahiri207official@gmail.com",
+          "subject": "Sorry to See You Go !!",
+          "template": "deleteAccountEmail",
+          "data": {
+              "appName": "H O T I F Y",
+              "userName" : "Graham"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

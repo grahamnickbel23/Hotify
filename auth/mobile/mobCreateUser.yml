@@ -1,0 +1,29 @@
+info:
+  name: mobCreateUser
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: http://100.123.126.113:8002/auth/mob/signup
+  headers:
+    - name: access_token
+      value: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTFhNTc3MTEyMTE4ZDgyMWRmNDllOTMiLCJyb2xlIjoiYWRtaW4iLCJwcmVmYXJlbmNlIjoiZGFyayIsImlhdCI6MTc4MDExMTU2MCwiZXhwIjoxNzgwMTE1MTYwfQ.KVxiCc7E67Ap5iJaR_ZIvJapDWchaOuDXi-wPOe8EfFYXO29Vb21TZ0gFAjdiJoI6Dv5vL_n9BciO9Z2d-2P3HUdR33ccasVrr30ANx4Qy4_Tf-B6rfJ8E_uPAKTuAxVO4KmEv8jU2FdfdnJ2_81Z2Nkf_pQikms_B30c4NCzmdq7WGSkLdKTDa8kY6nUJhn2XlrwBnGB5cA7OjiBOSG2rF8F0p39F2RypIjdmKm-h-aQmpaHMfghEAzZG70uFVRD1pGm4kr0HHXmC1WBsOE7r7sY8LSdrQ8sc9q1At-kKuHcTDqcvcUSls1sNTdk0Pghw16rwYEc_YDO2zTSFspIg
+  body:
+    type: json
+    data: |+
+      {
+          "email" : "dipanlahiri207official@gmail.com",
+          "password" : "ABC123",
+          "firstName" : "Graham",
+          "middeleName" : "Kumar",
+          "lastName" : "Nickbel"
+      }
+
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

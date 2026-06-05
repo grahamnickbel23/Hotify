@@ -1,0 +1,18 @@
+info:
+  name: mobileProfile
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: http://100.123.126.113:8002/auth/mob/profile
+  headers:
+    - name: access_token
+      value: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTE4NzZkZGRmZWRjODk5OGM4ZWRmNWUiLCJyb2xlIjoidXNlciIsInByZWZhcmVuY2UiOiJkYXJrIiwiaWF0IjoxNzgwMTA5MDk3LCJleHAiOjE3ODAxMTI2OTd9.gPlErcrfCE6Pu721bIdme4TFInJ1jSXojZjSQefPEpvMn6R0rvpuNKc6IN-srhEDy_93cKkBjrO9GASIt1fJBMMGIpd1boFTmfqXQxWpsJqR_i_f_M7vJ0Vza4wpLcB2aliid-f-t25Ip8fcPMQSwiLBZvpSQeGzZZIuGTQpBY69K1Iy879u224ogmt1aRo6Ce3ukbWpXQi7Oa057BQZGxf-RRzuYteN2T3hR5FsYDC5mR60YkofhKxroHpI292LfJKax5Mjy7K3-7Zc-4PE1A_0pmG3Bjvh9SDYc_mXalK_qhj0dmMw2K8PAPmfgiC0m9rHan8IYtUQWYLsbOjlZA
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,23 @@
+info:
+  name: playPogress
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: http://100.123.126.113:8001/streaming/pogress
+  body:
+    type: json
+    data: |-
+      {
+          "songId": "6a20e0c704e815d26d19abe5",
+          "currentPosition": 83,
+          "duration": 240
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

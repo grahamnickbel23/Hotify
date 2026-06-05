@@ -1,0 +1,22 @@
+info:
+  name: create History
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://100.123.126.113:8001/search/history
+  body:
+    type: json
+    data: |-
+      {
+        "searchItem" : "Tu",
+        "songId" : "6a1c5e75f0f445121897b58b"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

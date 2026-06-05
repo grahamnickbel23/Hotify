@@ -1,0 +1,30 @@
+info:
+  name: createAdmin
+  type: http
+  seq: 12
+
+http:
+  method: POST
+  url: http://100.123.126.113:8002/auth/signup
+  headers:
+    - name: admin
+      value: test@user.com
+  body:
+    type: json
+    data: |+
+      {
+          "email" : "addidus@gmail.com",
+          "password" : "ABC123",
+          "firstName" : "Ganja",
+          "middeleName" : "Kumar",
+          "lastName" : "Singh",
+          "userType" : "admin"
+      }
+
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

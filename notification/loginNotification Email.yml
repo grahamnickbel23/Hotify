@@ -1,0 +1,31 @@
+info:
+  name: loginNotification Email
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: http://100.123.126.113:8003/email/send
+  body:
+    type: json
+    data: |-
+      {
+          "target": "dipanlahiri207official@gmail.com",
+          "subject": "Hotify Login Notification",
+          "template": "loginEmail",
+          "data": {
+              "appName": "H O T I F Y",
+              "userName" : "Graham",
+              "deviceType" : "Android 15",
+              "ipAddress" : "100.123.126.113",
+              "loginLocation" : "Kolkata, India",
+              "loginTimestamp" : "9:40 IST 31st May 2026"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

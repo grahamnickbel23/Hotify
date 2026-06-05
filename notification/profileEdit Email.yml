@@ -1,0 +1,28 @@
+info:
+  name: profileEdit Email
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://100.123.126.113:8003/email/send
+  body:
+    type: json
+    data: |-
+      {
+          "target": "dipanlahiri207official@gmail.com",
+          "subject": "Successfully Updated Your Profile Info",
+          "template": "profileEditEmail",
+          "data": {
+              "appName": "H O T I F Y",
+              "userName" : "Graham",
+              "changedFieldName" : "password"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

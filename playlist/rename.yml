@@ -1,0 +1,22 @@
+info:
+  name: rename
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://100.123.126.113:8001/playlist/rename
+  body:
+    type: json
+    data: |-
+      {
+          "playlistId" : "6a22ad99244062cb75db5861",
+          "name" : "test-02"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

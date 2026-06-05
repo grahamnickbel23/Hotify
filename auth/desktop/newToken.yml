@@ -1,0 +1,18 @@
+info:
+  name: newToken
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://100.123.126.113:8002/auth/token
+  body:
+    type: text
+    data: ""
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

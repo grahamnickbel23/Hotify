@@ -1,0 +1,25 @@
+info:
+  name: userConfLogin
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: http://100.123.126.113:8002/auth/confirm/login
+  body:
+    type: json
+    data: |-
+      {
+        "otp": "415887",
+        "deviceType": "Android 15",
+        "ipAddress": "100.123.126.113",
+        "loginLocation": "Kolkata, India",
+        "loginTimestamp": "9:40 IST 31st May 2026"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

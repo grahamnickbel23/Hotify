@@ -1,0 +1,29 @@
+info:
+  name: PlaylistCreation Email
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: http://100.123.126.113:8003/email/send
+  body:
+    type: json
+    data: |-
+      {
+          "target": "dipanlahiri207official@gmail.com",
+          "subject": "New Playlist Created",
+          "template": "playlistEmail",
+          "data": {
+              "appName": "H O T I F Y",
+              "userName" : "Graham",
+              "playlistName" : "Bollywood Classic"
+            
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

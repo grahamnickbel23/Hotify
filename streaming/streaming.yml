@@ -1,0 +1,22 @@
+info:
+  name: streaming
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: http://100.123.126.113:8001/streaming/:songId/:fileName
+  params:
+    - name: songId
+      value: 6a20e0c704e815d26d19abe5
+      type: path
+    - name: fileName
+      value: init-stream1.webm
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

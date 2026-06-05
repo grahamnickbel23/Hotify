@@ -1,0 +1,23 @@
+info:
+  name: microservices profile
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://100.123.126.113:8002/auth/micro/profile
+  body:
+    type: json
+    data: |-
+      {
+        "userId" : "6a1a579b12118d821df49e94"
+        
+        
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

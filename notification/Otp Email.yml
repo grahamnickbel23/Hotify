@@ -1,0 +1,28 @@
+info:
+  name: Otp Email
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://100.123.126.113:8003/email/send
+  body:
+    type: json
+    data: |-
+      {
+          "target": "dipanlahiri207official@gmail.com",
+          "subject": "OTP Verification",
+          "template": "otpEmail",
+          "data": {
+              "otp": "402851",
+              "expirySeconds": 120,
+              "appName": "H O T I F Y"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
