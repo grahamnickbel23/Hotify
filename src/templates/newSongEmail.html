@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Track Arrival</title>
+    <style>
+        @media only screen and (max-width: 600px) {
+            .main-card {
+                padding: 24px !important;
+            }
+
+            .main-heading {
+                font-size: 22px !important;
+            }
+
+            .body-text {
+                font-size: 13px !important;
+            }
+
+            .track-title {
+                font-size: 18px !important;
+            }
+
+            .artist-name {
+                font-size: 14px !important;
+            }
+
+            .cta-button {
+                width: 100% !important;
+                text-align: center !important;
+                box-sizing: border-box;
+            }
+
+            .footer-text {
+                font-size: 10px !important;
+            }
+        }
+    </style>
+</head>
+
+<body style="margin:0; padding:0; background-color:#F5F5F5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Georgia,serif; color:#E5E5E7;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#F5F5F5; padding:60px 20px;">
+        <tr>
+            <td align="center">
+                <table width="100%" max-width="520px" border="0" cellspacing="0" cellpadding="0" style="max-width: 520px;">
+                    <!-- Top Logo Header -->
+                    <tr>
+                        <td align="center" style="padding-bottom: 40px;">
+                            <table border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td align="center">
+                                        <div style="font-size: 40px; margin-bottom: 8px;">🎧</div>
+                                        <div style="font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: #4B5563;">
+                                            {{appName}}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Main Body Card -->
+                    <tr>
+                        <td class="main-card" style="background-color: #151518; border-radius: 4px; padding: 40px; border: 1px solid #232329;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <!-- Top Accent Badge -->
+                                <tr>
+                                    <td style="padding-bottom: 16px; text-align: center">
+                                        <span style="text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #1DB954;">
+                                            Fresh Release
+                                        </span>
+                                    </td>
+                                </tr>
+                                <!-- Main Heading -->
+                                <tr>
+                                    <td align="center" style="padding-bottom: 20px;">
+                                        <h2 class="main-heading" style="font-size: 26px; font-weight: 300; margin: 0; color: #FFFFFF; font-family: 'Times New Roman', Times, serif; text-align: center; line-height: 1.2;">
+                                            New Sound Dropped
+                                        </h2>
+                                    </td>
+                                </tr>
+                                <!-- Body Text -->
+                                <tr>
+                                    <td class="body-text" style="padding-bottom: 24px; line-height: 1.6; font-size: 14px; color: #9A9AA2; text-align: center;">
+                                        Hey {{userName}}, a fresh addition to our audio stream catalog has just landed. Refresh your queue and be among the first to listen to this newly added track:
+                                    </td>
+                                </tr>
+
+                                <!-- Track Announcement Highlight Box -->
+                                <tr>
+                                    <td style="padding-bottom: 30px;">
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #1C1C21; border-radius: 4px; border: 1px solid #2A2A32; padding: 20px;">
+                                            <tr>
+                                                <td align="center">
+                                                    <!-- Dynamic Track / Album Artwork -->
+                                                    <img src="{{trackArtworkUrl}}" alt="{{trackName}}" width="140" height="140" style="display: block; border-radius: 4px; background-color: #282830; object-fit: cover; border: 1px solid #383842; box-shadow: 0 4px 15px rgba(0,0,0,0.4);" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td align="center" style="padding-top: 16px;">
+                                                    <div class="track-title" style="font-size: 20px; font-weight: 700; color: #FFFFFF; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; word-break: break-word; line-height: 1.3;">
+                                                        {{trackName}}
+                                                    </div>
+                                                    <div class="artist-name" style="font-size: 15px; color: #1DB954; font-weight: 600; padding-top: 4px; word-break: break-word;">
+                                                        {{artistName}}
+                                                    </div>
+                                                    <div style="font-size: 11px; color: #62626A; padding-top: 6px; text-transform: uppercase; letter-spacing: 1px;">
+                                                        Language: {{tracklanguage}}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                <!-- Interactive Action Button -->
+                                <tr>
+                                    <td align="center" style="padding-bottom: 35px;">
+                                        <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                                            <tr>
+                                                <td align="center">
+                                                    <a href="{{trackPlayUrl}}" class="cta-button" style="background-color: #1DB954; color: #FFFFFF; font-size: 13px; font-weight: 700; text-decoration: none; padding: 14px 28px; border-radius: 50px; display: inline-block; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(29, 185, 84, 0.25);">
+                                                        Listen On Hotify
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Core Automation Subtext -->
+                                <tr>
+                                    <td style="font-size: 12px; color: #62626A; line-height: 1.5; text-align: center; border-top: 1px solid #232329; padding-top: 20px;">
+                                        Don't want to miss updates from {{artistName}}? Go to their profile inside your {{appName}} app and toggle notifications to automatically track all upcoming releases.
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Small Sub-Footer -->
+                    <tr>
+                        <td align="center" style="padding-top: 30px;">
+                            <p class="footer-text" style="font-size: 11px; color: #44444A; margin: 0; letter-spacing: 0.5px;">
+                                Powered by Hotify Notification Systems • Kolkata, India
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

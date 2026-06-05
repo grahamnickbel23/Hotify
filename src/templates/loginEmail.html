@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotify Login Notification</title>
+    <style>
+        @media only screen and (max-width: 600px) {
+            .main-card {
+                padding: 24px !important;
+            }
+
+            .main-heading {
+                font-size: 22px !important;
+            }
+
+            .body-text {
+                font-size: 13px !important;
+            }
+
+            .info-label {
+                width: 80px !important;
+                font-size: 12px !important;
+            }
+
+            .info-value {
+                font-size: 12px !important;
+            }
+
+            .footer-text {
+                font-size: 10px !important;
+            }
+        }
+    </style>
+</head>
+
+<body style="margin:0; padding:0; background-color:#F5F5F5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Georgia,serif; color:#E5E5E7;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#F5F5F5; padding:60px 20px;">
+        <tr>
+            <td align="center">
+                <table width="100%" max-width="520px" border="0" cellspacing="0" cellpadding="0" style="max-width: 520px;">
+                    <!-- Top Logo Header -->
+                    <tr>
+                        <td align="center" style="padding-bottom: 40px;">
+                            <table border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td align="center">
+                                        <div style="font-size: 40px; margin-bottom: 8px;">🎧</div>
+                                        <div style="font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: #4B5563;">
+                                            {{appName}}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Main Body Card -->
+                    <tr>
+                        <td class="main-card" style="background-color: #151518; border-radius: 4px; padding: 40px; border: 1px solid #232329;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <!-- Top Accent Badge -->
+                                <tr>
+                                    <td style="padding-bottom: 16px; text-align: center">
+                                        <span style="text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #1DB954;">
+                                            Security Monitor
+                                        </span>
+                                    </td>
+                                </tr>
+                                <!-- Main Heading -->
+                                <tr>
+                                    <td align="center" style="padding-bottom: 20px;">
+                                        <h2 class="main-heading" style="font-size: 26px; font-weight: 300; margin: 0; color: #FFFFFF; font-family: 'Times New Roman', Times, serif; text-align: center; line-height: 1.2;">
+                                            Successful Sign-In
+                                        </h2>
+                                    </td>
+                                </tr>
+                                <!-- Body Text -->
+                                <tr>
+                                    <td class="body-text" style="padding-bottom: 24px; line-height: 1.6; font-size: 14px; color: #9A9AA2;">
+                                        Hello {{userName}}, we detected a successful sign-in to your {{appName}} account. Here are the access framework logs for this session:
+                                    </td>
+                                </tr>
+
+                                <!-- Device & IP Metadata Box -->
+                                <tr>
+                                    <td style="padding-bottom: 30px;">
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #1C1C21; border-radius: 4px; border: 1px solid #2A2A32; padding: 20px;">
+                                            <!-- Device Row -->
+                                            <tr>
+                                                <td class="info-label" width="100" style="font-size: 13px; font-weight: 700; color: #62626A; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Device:</td>
+                                                <td class="info-value" style="font-size: 14px; color: #FFFFFF; padding-bottom: 10px;">{{deviceType}}</td>
+                                            </tr>
+                                            <!-- IP Address Row -->
+                                            <tr>
+                                                <td class="info-label" width="100" style="font-size: 13px; font-weight: 700; color: #62626A; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">IP Address:</td>
+                                                <td class="info-value" style="font-size: 14px; color: #1DB954; font-family: monospace; padding-bottom: 10px; font-weight: 600;">{{ipAddress}}</td>
+                                            </tr>
+                                            <!-- Location Row -->
+                                            <tr>
+                                                <td class="info-label" width="100" style="font-size: 13px; font-weight: 700; color: #62626A; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Location:</td>
+                                                <td class="info-value" style="font-size: 14px; color: #E5E5E7; padding-bottom: 10px;">{{loginLocation}}</td>
+                                            </tr>
+                                            <!-- Time Row -->
+                                            <tr>
+                                                <td class="info-label" width="100" style="font-size: 13px; font-weight: 700; color: #62626A; text-transform: uppercase; letter-spacing: 0.5px;">Time:</td>
+                                                <td class="info-value" style="font-size: 13px; color: #9A9AA2;">{{loginTimestamp}}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Security Protocol Warnings -->
+                                <tr>
+                                    <td style="font-size: 12px; color: #62626A; line-height: 1.5; border-top: 1px solid #232329; padding-top: 20px;">
+                                        <strong>Recognize this activity?</strong> If this was you, no further action is necessary. However, if you don't recognize this device or location metadata, please change your security keys immediately to protect your streaming playlists.
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Small Sub-Footer -->
+                    <tr>
+                        <td align="center" style="padding-top: 30px;">
+                            <p class="footer-text" style="font-size: 11px; color: #44444A; margin: 0; letter-spacing: 0.5px;">
+                                Powered by Hotify Notification Systems • Kolkata, India
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>
