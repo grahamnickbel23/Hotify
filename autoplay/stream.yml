@@ -5,14 +5,14 @@ info:
 
 http:
   method: GET
-  url: http://127.0.0.1:8000/api/hotify/stream/:playlist/:track
-  params:
-    - name: playlist
-      value: test
-      type: path
-    - name: track
-      value: Bulbuli.opus
-      type: path
+  url: http://100.123.126.113:8001/streaming/autoplay
+  body:
+    type: json
+    data: |-
+      {
+        "playlistId" : "6a22af125de598aa1d6872a2",
+        "songId" : "6a22ace1244062cb75db585f"
+      }
   auth: inherit
 
 settings:
