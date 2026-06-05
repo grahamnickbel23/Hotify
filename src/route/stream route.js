@@ -37,4 +37,14 @@ route.post("/mob/pogress",
     genPerser('access_token', 'accessToken'),
     asyncHandler(stream.progress, "updating playback progress"));
 
+// auto play
+route.get("/autoplay",
+    genPerser('access_token', 'accessToken'),
+    asyncHandler(stream.autoPlay, "getting auto play suggestion"));
+
+route.get("/mob/autoplay",
+    (req, res, next) => {req.format = 'token', next()}, 
+    genPerser('access_token', 'accessToken'),
+    asyncHandler(stream.autoPlay, "getting auto play suggestion"));
+
 export default route;

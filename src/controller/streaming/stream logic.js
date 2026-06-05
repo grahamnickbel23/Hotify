@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import songModel from "../../model/song Model.js";
+import playlistModel from "../../model/playlist Model.js";
 import playStateModel from "../../model/playState Model.js";
 import streamHistoryModel from "../../model/streamHistory Model.js";
 
@@ -93,6 +94,32 @@ export default class stream {
             success: true,
             message: "playback progress updated",
             record: playbackState
+        });
+    }
+
+    static async autoPlay(req, res) {
+
+        // get the info
+        const { playlistId, songId } = req.body;
+        if (!playlistId || !songId) return res.status(400).json({ success: false, message: "missing information" });
+        
+        // cheak if the playlist exisit
+        const playlist = await playlistModel.findById(playlistId).populate("songs.songId");
+        if (!playlist) return res.status(404).json({ success: false, message: "playlist not found" });
+        
+        // find inde of the song
+        const index = playlist.songs.findIndex( song => song.songId._id.toString() === songId );
+        if (index === -1) return res.status(404).json({ success: false, message: "song not found in playlist" });
+        
+        // get the id of the next song
+        const nextSong = playlist.songs[index + 1];
+        if (!nextSong) return res.status(200).json({ success: true, hasNext: false });
+        
+        // return ok if all ok
+        return res.status(200).json({
+            success: true,
+            hasNext: true,
+            song: nextSong.songId
         });
     }
 }
