@@ -41,6 +41,28 @@ route.post("/mob/read",
     genPerser('access_token', 'accessToken'),
     asyncHandler(song.read, "reading song data"));
 
+// list all song
+route.get("/all",
+    genPerser('access_token', 'accessToken'), adminAuth,
+    asyncHandler(song.listAll, "listing all songs in the system"));
+
+// list all song mobile
+route.get("/mob/all",
+    (req, res, next) => {req.format = 'token', next()}, 
+    genPerser('access_token', 'accessToken'), adminAuth,
+    asyncHandler(song.listAll, "listing all songs in the system"));
+
+// list songs by admin account
+route.get("/all/admin",
+    genPerser('access_token', 'accessToken'), adminAuth,
+    asyncHandler(song.listAdmin, "listimg all song uploaded by admin songs"));
+
+// list songs by admin account mobile
+route.get("/mob/all/admin",
+    (req, res, next) => {req.format = 'token', next()}, 
+    genPerser('access_token', 'accessToken'), adminAuth,
+    asyncHandler(song.listAdmin, "listimg all song uploaded by admin songs"));
+
 // delete song
 route.post("/delete",
     genPerser('access_token', 'accessToken'), adminAuth,

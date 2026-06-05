@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import songModel from "../../model/song Model.js";
+import lyricsModel from "../../model/lyrics Model.js";
 import songApi from "../../services/song Service.js";
 
 export default class song {
@@ -92,7 +93,7 @@ export default class song {
 
         // save the info
         const updatedInfo = { [fieldName]: info };
-        song = await songModel.findByIdAndUpdate( songId, updatedInfo, { new: true });
+        song = await songModel.findByIdAndUpdate(songId, updatedInfo, { new: true });
 
         // return ok if all ok
         return res.status(200).json({
@@ -121,6 +122,36 @@ export default class song {
         });
     }
 
+    // list all songs
+    static async listAll(req, res) {
+
+        // get the songs
+        const songs = await songModel.find().sort({ createdAt: -1 });
+
+        // return ok if all ok
+        return res.status(200).json({
+            success: true,
+            message: "songs fetched successfully",
+            count: songs.length,
+            data: songs
+        });
+    }
+
+    // list songs uploaded by current admin
+    static async listAdmin(req, res) {
+
+        // get the songs
+        const songs = await songModel.find({ uploadedBy: req.accessToken.userId }).sort({ createdAt: -1 });
+
+        // return ok if all ok
+        return res.status(200).json({
+            success: true,
+            message: "admin songs fetched successfully",
+            count: songs.length,
+            info: songs
+        });
+    }
+
     // delete song
     static async delete(req, res) {
 
@@ -132,6 +163,8 @@ export default class song {
         const song = await songModel.findById(songId);
         if (!song) return res.status(404).json({ success: false, message: "song not found" });
 
+        // delete lyrics
+        await lyricsModel.deleteOne({ songId: song._id});
 
         // deelte the folder physically
         const mediaFolder = path.join(process.cwd(), "media", song.title);
