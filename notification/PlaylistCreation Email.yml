@@ -17,7 +17,6 @@ http:
               "appName": "H O T I F Y",
               "userName" : "Graham",
               "playlistName" : "Bollywood Classic"
-            
           }
       }
   auth: inherit

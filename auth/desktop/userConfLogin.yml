@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "otp": "415887",
+        "otp": "300098",
         "deviceType": "Android 15",
         "ipAddress": "100.123.126.113",
         "loginLocation": "Kolkata, India",

@@ -5,10 +5,13 @@ info:
 
 http:
   method: POST
-  url: http://127.0.0.1:8000/api/playlists
+  url: http://100.123.126.113:8001/playlist/create
   body:
     type: json
-    data: "{\r\n    \"name\" : \"test-02\"\r\n}"
+    data: |-
+      {
+          "name" : "test-02"
+      }
   auth: inherit
 
 settings:
