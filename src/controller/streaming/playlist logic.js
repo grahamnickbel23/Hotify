@@ -1,4 +1,5 @@
 import playlistModel from "../../model/playlist Model.js";
+import playlistApi from "../../services/playlist Service.js";
 
 export default class playlist {
 
@@ -15,6 +16,9 @@ export default class playlist {
 
         // if all ok create a new playlist
         const playlist = await playlistModel.create({ userId: req.accessToken.userId, name });
+
+        // send email for playlist creation
+        await playlistApi.email(req.accessToken.userId, name);
 
         // if all ok return ok
         return res.status(201).json({
