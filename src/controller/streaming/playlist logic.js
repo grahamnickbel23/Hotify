@@ -28,17 +28,33 @@ export default class playlist {
         });
     }
 
-    // read playlists
-    static async read(req, res) {
+    // read all playlists
+    static async allRead(req, res) {
 
         const playlists = await playlistModel.find({ userId: req.accessToken.userId })
-            .populate("songs.songId")
             .sort({ updatedAt: -1 });
 
         return res.status(200).json({
             success: true,
             message: "playlists fetched successfully",
             playlists
+        });
+    }
+
+    // read a playlist
+    static async oneRead (req, res) {
+
+        // get the data
+        const { playlistId } = req.body;
+
+        const allSong = await playlistModel.findById(playlistId).populate("songs.songId").sort({ updatedAt: -1 });
+        if (!allSong) return res.status(404).json({ success: false, message: `no playlist found` });
+
+        // if all ok send them
+        return res.status(200).json({
+            success: true,
+            message: "playlists fetched successfully",
+            playlist: allSong
         });
     }
 

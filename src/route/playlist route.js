@@ -16,16 +16,27 @@ route.post("/mob/create",
     genPerser('access_token', 'accessToken'),
     asyncHandler(playlist.create, "creating new playlist"));
 
-// read playlist
+// read all playlist
 route.get("/read",
     genPerser('access_token', 'accessToken'),
-    asyncHandler(playlist.read, "reading playlist"));
+    asyncHandler(playlist.allRead, "reading all playlist"));
 
-// read mobile playlist
+// read all playlist mobile
 route.get("/mob/read",
     (req, res, next) => {req.format = 'token', next()},
     genPerser('access_token', 'accessToken'),
-    asyncHandler(playlist.read, "reading playlist"));
+    asyncHandler(playlist.allRead, "reading all playlist"));
+
+// read a spcific playlist
+route.post("/one/read",
+    genPerser('access_token', 'accessToken'),
+    asyncHandler(playlist.oneRead, "reading a playlist"));
+
+// read a spcific playlist
+route.post("/mob/one/read",
+    (req, res, next) => {req.format = 'token', next()},
+    genPerser('access_token', 'accessToken'),
+    asyncHandler(playlist.oneRead, "reading a playlist"));
 
 // add songs
 route.post("/add/song", 

@@ -114,11 +114,15 @@ export default class song {
         const song = await songModel.findById(songId);
         if (!song) return res.status(404).json({ success: false, message: "song not found" });
 
+        // search lyrics 
+        const lyrics = await lyricsModel.findOne({songId});
+        
         // return ok if all ok
         return res.status(200).json({
             success: true,
             message: "song fetched successfully",
-            song
+            songInfo: song,
+            lyricsInfo: lyrics
         });
     }
 
