@@ -1150,7 +1150,7 @@ export const MainContent: React.FC = () => {
                                       >
                                         {fullSong.title}
                                       </span>
-                                      <span className="song-artist-sub" style={{
+                                      <span className="song-artist-sub hide-on-mobile" style={{
                                         fontSize: '0.8rem',
                                         color: 'var(--text-secondary)',
                                         marginTop: '4px',
@@ -1514,7 +1514,7 @@ export const MainContent: React.FC = () => {
                                 setActiveSection('song-detail');
                               }}
                               >{song.title}</span>
-                              <span className="song-artist-sub" style={{
+                              <span className="song-artist-sub hide-on-mobile" style={{
                                 fontSize: '0.8rem',
                                 color: 'var(--text-secondary)',
                                 marginTop: '4px',
@@ -2678,7 +2678,7 @@ export const MainContent: React.FC = () => {
                               >
                                 {song.title}
                               </span>
-                              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <span className="hide-on-mobile" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {getArtistName(song)}
                               </span>
                             </div>
