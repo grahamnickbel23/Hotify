@@ -174,16 +174,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const data = await api.getProfile();
       handleLoginSuccess(data.user);
     } catch (err) {
-      // Access token failed or missing, try refresh token
-      try {
-        const refreshRes = await api.refreshToken();
-        if (refreshRes && refreshRes.accessToken) {
-          const data = await api.getProfile();
-          handleLoginSuccess(data.user);
-        } else {
-          handleLogoutState();
+      // Access token failed or missing, try refresh token up to 2 times
+      let refreshed = false;
+      for (let i = 0; i < 2; i++) {
+        try {
+          const refreshRes = await api.refreshToken();
+          // If we successfully get a token (or it sets a cookie), try getting profile
+          if (refreshRes) {
+            const data = await api.getProfile();
+            handleLoginSuccess(data.user);
+            refreshed = true;
+            break;
+          }
+        } catch {
+          // If it fails, it will loop and try one more time
         }
-      } catch {
+      }
+      
+      if (!refreshed) {
         handleLogoutState();
       }
     } finally {

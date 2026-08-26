@@ -182,18 +182,21 @@ class ApiClient {
     }, true);
   }
 
-  async refreshToken(): Promise<{ accessToken: string }> {
+  async refreshToken(): Promise<{ accessToken?: string }> {
     const refresh = this.getRefreshToken();
-    if (!refresh) throw new Error('No refresh token available');
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (refresh) {
+      headers['Authorization'] = `Bearer ${refresh}`;
+    }
 
     // POST /auth/token retrieves a new access token
     const res = await fetch(`/auth/token`, {
       method: 'POST',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${refresh}`,
-      },
+      headers,
     });
 
     if (!res.ok) {
