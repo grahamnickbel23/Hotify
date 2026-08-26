@@ -449,7 +449,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       streaming: {
         abr: {
           autoSwitchBitrate: {
-            audio: false // Disable auto scaling to force selected quality
+            audio: true // Disable auto scaling to force selected quality (chnaged on 26/08/2026)
           }
         }
       }
