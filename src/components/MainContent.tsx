@@ -41,7 +41,9 @@ export const MainContent: React.FC = () => {
     logout,
     userProfile,
     isPlaying,
-    togglePlay
+    togglePlay,
+    theme,
+    toggleTheme
   } = useApp();
 
   useEffect(() => {
@@ -2522,13 +2524,30 @@ export const MainContent: React.FC = () => {
                   </div>
 
                   <button
+                    onClick={toggleTheme}
+                    className="btn-primary"
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: '1px solid var(--border-color)',
+                      color: 'var(--text-main)',
+                      boxShadow: 'none',
+                      marginTop: '32px',
+                      width: '100%',
+                      textAlign: 'center',
+                      textTransform: 'none'
+                    }}
+                  >
+                    {theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                  </button>
+
+                  <button
                     onClick={() => logout()}
                     className="btn-primary"
                     style={{
                       backgroundColor: 'var(--accent-red)',
                       color: '#ffffff',
                       boxShadow: 'none',
-                      marginTop: '32px',
+                      marginTop: '16px',
                       width: '100%',
                       textAlign: 'center',
                       textTransform: 'none'

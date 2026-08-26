@@ -258,7 +258,7 @@ export const Sidebar: React.FC = () => {
           </span>
         </button>
 
-        <div className="mobile-full-width" style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '120px' }}>
+        <div className="mobile-full-width show-on-mobile" style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '120px' }}>
           {/* Theme Switcher Full Button */}
           <button
             onClick={toggleTheme}
