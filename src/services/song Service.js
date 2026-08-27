@@ -42,7 +42,7 @@ export default class songApi {
     }
 
     // function to fetch lyrics
-    static async lyricsUpload(name, songId) {
+    static async lyrics(name, songId) {
 
         // get the song data from genious
         const client = new genious.Client(process.env.CLIENT_ACCESS_TOKEN);
@@ -51,8 +51,17 @@ export default class songApi {
         // throw error if song not found
         if (!search.length) throw new Error("Song not found on Genius");
 
-        // get the lyrics and save into mongo db
-        const lyrics = await search[0].lyrics();
+        // return the lyrics
+        return await search[0].lyrics();
+    }
+
+    // function for lyrics upload
+    static async lyricsUpload(data, songId) {
+        
+        // cheak if the lyrics been uploaded or not
+        const lyrics = data.lyrics || await this.lyrics(data.title, songId);
+
+        // get the lyrics saved into mongo db
         await lyricsModel.create({ songId, lyrics });
     }
 

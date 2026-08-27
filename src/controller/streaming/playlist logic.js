@@ -42,21 +42,75 @@ export default class playlist {
     }
 
     // read a playlist
-    static async oneRead (req, res) {
+    static async oneRead(req, res) {
 
-        // get the data
-        const { playlistId } = req.body;
+    const { id } = req.params;
+    const playlist = await playlistModel.findById(id)
+        .populate({
+            path: "songs.songId",
+            select: "title firstSinger secondSinger otherSinger uploadedBy"
+        })
+        .lean();
 
-        const allSong = await playlistModel.findById(playlistId).populate("songs.songId").sort({ updatedAt: -1 });
-        if (!allSong) return res.status(404).json({ success: false, message: `no playlist found` });
+    if (!playlist) {return res.status(404).json({ success: false, message: "no playlist found" })}
 
-        // if all ok send them
-        return res.status(200).json({
-            success: true,
-            message: "playlists fetched successfully",
-            playlist: allSong
-        });
-    }
+    playlist.songs = await Promise.all(
+        playlist.songs.map(async (entry) => {
+
+            const song = entry.songId;
+            if (!song) return entry;
+
+            try {
+
+                const profileInfo = await songApi.profile(song.uploadedBy);
+
+                const {
+                    firstName,
+                    middeleName,
+                    lastName
+                } = profileInfo.profile;
+
+                return {
+                    added: entry.added,
+                    songId: {
+                        _id: song._id,
+                        title: song.title,
+                        firstSinger: song.firstSinger,
+                        secondSinger: song.secondSinger,
+                        otherSinger: song.otherSinger,
+                        uploadedBy: [
+                            firstName,
+                            middeleName,
+                            lastName
+                        ]
+                            .filter(Boolean)
+                            .join(" ")
+                    }
+                };
+
+            } catch {
+
+                return {
+                    added: entry.added,
+                    songId: {
+                        _id: song._id,
+                        title: song.title,
+                        firstSinger: song.firstSinger,
+                        secondSinger: song.secondSinger,
+                        otherSinger: song.otherSinger,
+                        uploadedBy: null
+                    }
+                };
+            }
+        })
+    );
+
+    return res.status(200).json({
+        success: true,
+        message: "playlist fetched successfully",
+        playlist
+    });
+}
 
     // add song to playlist
     static async updateSong(req, res) {

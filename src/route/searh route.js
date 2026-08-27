@@ -6,7 +6,7 @@ import { asyncHandler } from "../utils/asyncHandeller utils.js";
 const route = express.Router();
 
 // search queary
-route.get("/queary", 
+route.get("/:query", 
     genPerser('access_token', 'accessToken'),
     asyncHandler(search.song, "genaral search"));
 
@@ -16,7 +16,7 @@ route.post("/history",
     asyncHandler(search.history, "saved search result"));
 
 // read search history
-route.post("/read/history",
+route.get("/read/history",
     genPerser('access_token', 'accessToken'),
     asyncHandler(search.readHistory, "read search result"));
 

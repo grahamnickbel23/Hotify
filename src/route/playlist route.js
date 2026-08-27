@@ -28,12 +28,12 @@ route.get("/mob/read",
     asyncHandler(playlist.allRead, "reading all playlist"));
 
 // read a spcific playlist
-route.post("/one/read",
+route.get("/:id/read",
     genPerser('access_token', 'accessToken'),
     asyncHandler(playlist.oneRead, "reading a playlist"));
 
 // read a spcific playlist
-route.post("/mob/one/read",
+route.get("/mob/:id/read",
     (req, res, next) => {req.format = 'token', next()},
     genPerser('access_token', 'accessToken'),
     asyncHandler(playlist.oneRead, "reading a playlist"));

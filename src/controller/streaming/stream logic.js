@@ -60,7 +60,7 @@ export default class stream {
         // return error if an segment is not found
         if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: "segment not found" });
 
-        console.log(`Api is called: ${fileName}`);
+        // console.log(`Api is called: ${fileName}`);
 
         // return files
         return res.status(200).sendFile(filePath);
@@ -122,4 +122,37 @@ export default class stream {
             song: nextSong.songId
         });
     }
+
+    // get stream history
+    static async history(req, res) {
+
+    let { length, page } = req.body;
+
+    length = Number(length) || 7;
+    page = Number(page) || 1;
+
+    const historyInfo = await streamHistoryModel
+        .find({ user: req.accessToken.userId })
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * length)
+        .limit(length)
+        .populate({
+            path: "song",
+            select: "title firstSinger"
+        });
+
+    if (historyInfo.length === 0) {
+        return res.status(200).json({
+            success: true,
+            message: "No listening history found",
+            result: []
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: "Successfully fetched user history",
+        result: historyInfo
+    });
+}
 }

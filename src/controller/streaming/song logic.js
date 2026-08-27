@@ -41,7 +41,7 @@ export default class song {
         fs.unlinkSync(inputPath);
 
         // save the lyrics
-        await songApi.lyricsUpload(data.title, savedSong._id);
+        await songApi.lyricsUpload(data, savedSong._id);
 
         // send a email for song upload too
         await songApi.emailUpload(req.accessToken.userId, data);
@@ -50,6 +50,11 @@ export default class song {
             success: true,
             message: "song uploaded successfully"
         });
+    }
+
+    // get lyrics
+    static lyricsFetch (req, res) {
+        // will be the controller for the lyrics
     }
 
     // update song meta data
@@ -113,31 +118,65 @@ export default class song {
         // cheak if the song exisit
         const song = await songModel.findById(songId);
         if (!song) return res.status(404).json({ success: false, message: "song not found" });
+        const songData = song.toObject();
+
+        // get the uploader profile
+        const profileInfo = await songApi.profile(songData.uploadedBy);
+        const { firstName, middeleName, lastName } = profileInfo.profile;
+        songData.uploadedBy = [firstName, middeleName, lastName].filter(Boolean).join(" ");
 
         // search lyrics 
-        const lyrics = await lyricsModel.findOne({songId});
-        
+        const lyrics = await lyricsModel.findOne({ songId });
+
         // return ok if all ok
         return res.status(200).json({
             success: true,
             message: "song fetched successfully",
-            songInfo: song,
+            songInfo: songData,
             lyricsInfo: lyrics
         });
+    }
+
+    // get lyrics
+    static async lyrics(req, res) {
+
+        // get the info
+        const { songId } = req.body;
+        if (!songId) return res.status(400).json({ success: false, message: "song id missing" });
+
+        // search lyrics 
+        const lyrics = await lyricsModel.findOne({ songId });
+        if (!lyrics) return res.status(404).json({ success: false, message: "lyrics not found" });
+
+        // return ok if all ok
+        return res.status(200).json({
+            suucess: true,
+            message: 'lyrics fetched successfully',
+            lyricsInfo: lyrics
+        })
     }
 
     // list all songs
     static async listAll(req, res) {
 
-        // get the songs
-        const songs = await songModel.find().sort({ createdAt: -1 });
+        const songs = await songModel.find().sort({ createdAt: -1 }).lean();
+        const enrichedSongs = await Promise.all(
+            songs.map(async (song) => {
+                const profileInfo = await songApi.profile(song.uploadedBy);
+                if (profileInfo.success) {
+                    const { firstName, middeleName, lastName } = profileInfo.profile;
+                    song.uploadedBy = [firstName, middeleName, lastName].filter(Boolean).join(" ")
+                }
 
-        // return ok if all ok
+                return song;
+            })
+        );
+
         return res.status(200).json({
             success: true,
             message: "songs fetched successfully",
-            count: songs.length,
-            data: songs
+            count: enrichedSongs.length,
+            data: enrichedSongs
         });
     }
 
@@ -168,7 +207,7 @@ export default class song {
         if (!song) return res.status(404).json({ success: false, message: "song not found" });
 
         // delete lyrics
-        await lyricsModel.deleteOne({ songId: song._id});
+        await lyricsModel.deleteOne({ songId: song._id });
 
         // deelte the folder physically
         const mediaFolder = path.join(process.cwd(), "media", song.title);

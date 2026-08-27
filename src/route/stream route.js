@@ -47,4 +47,14 @@ route.get("/mob/autoplay",
     genPerser('access_token', 'accessToken'),
     asyncHandler(stream.autoPlay, "getting auto play suggestion"));
 
+// stream history
+route.post("/history", 
+    genPerser('access_token', 'accessToken'),
+    asyncHandler(stream.history, "getting streaming history"));
+
+route.get("/mob/history",
+    (req, res, next) => {req.format = 'token', next()}, 
+    genPerser('access_token', 'accessToken'),
+     asyncHandler(stream.history, "getting streaming history"));
+
 export default route;

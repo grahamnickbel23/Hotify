@@ -6,7 +6,8 @@ export default class search {
     static async song(req, res) {
 
         // get the queary
-        const { query } = req.body;
+        const { query } = req.params;
+        console.log(`ans: ${query}`);
         if (!query) return res.status(400).json({ success: false, message: "search query missing" });
 
         // find the songs

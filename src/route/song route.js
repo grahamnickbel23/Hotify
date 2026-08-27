@@ -41,6 +41,17 @@ route.post("/mob/read",
     genPerser('access_token', 'accessToken'),
     asyncHandler(song.read, "reading song data"));
 
+// read lyrics
+route.post("/lyrics",
+     genPerser('access_token', 'accessToken'),
+     asyncHandler(song.lyrics, "reading lyrics data"));
+
+// read lyrics data mobile
+route.post("/mob/lyrics",
+    (req, res, next) => {req.format = 'token', next()}, 
+    genPerser('access_token', 'accessToken'),
+    asyncHandler(song.lyrics, "reading lyrics data"));
+
 // list all song
 route.get("/all",
     genPerser('access_token', 'accessToken'), adminAuth,
