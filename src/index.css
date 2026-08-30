@@ -1132,7 +1132,7 @@ input:focus, select:focus, textarea:focus {
   
   /* Profile Layout */
   .profile-container {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 32px !important;
   }
   
@@ -1167,6 +1167,10 @@ input:focus, select:focus, textarea:focus {
 @media (max-width: 768px) {
   .create-selection-grid {
     grid-template-columns: 1fr;
+  }
+  .mobile-profile-card {
+    padding: 16px !important;
+    max-width: calc(100vw - 32px) !important;
   }
 }
 

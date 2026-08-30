@@ -14,6 +14,18 @@ import './App.css';
 const AppContent: React.FC = () => {
   const { isLoggedIn, authStep, isCheckingAuth } = useApp();
 
+  // Prevent accidental/automatic reloads (especially on mobile backgrounding)
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = ''; // Required by modern browsers to trigger the confirmation dialog
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   // Show a pulsing loader while verifying the session on page reload/mount
   if (isCheckingAuth) {
     return (

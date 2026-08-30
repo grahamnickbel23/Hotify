@@ -2445,7 +2445,7 @@ export const MainContent: React.FC = () => {
         {/* 4. PROFILE SETTINGS SCREEN (Includes Avatar, Details, and Uploaded Songs list) */}
         {activeSection === 'profile-settings' && (() => {
           return (
-            <div className="profile-container" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '40px', alignItems: 'start', minHeight: '600px' }}>
+            <div className="profile-container" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: '40px', alignItems: 'start', minHeight: '600px', width: '100%', boxSizing: 'border-box' }}>
               {/* Left side: Avatar & Profile Details */}
               <div style={{
                 display: 'flex',
@@ -2477,7 +2477,7 @@ export const MainContent: React.FC = () => {
                   {(userProfile?.firstName || 'P').charAt(0).toUpperCase()}
                 </div>
 
-                <div style={{
+                <div className="mobile-profile-card" style={{
                   backgroundColor: 'var(--bg-card)',
                   border: '1px solid var(--border-color)',
                   borderRadius: '12px',
@@ -2491,7 +2491,7 @@ export const MainContent: React.FC = () => {
                   </h2>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', minWidth: 0 }}>
+                    <div className="hide-on-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', minWidth: 0 }}>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', flexShrink: 0 }}>Email</span>
                       <span style={{ fontWeight: 600, wordBreak: 'break-all', textAlign: 'right', minWidth: 0 }}>{userProfile?.email || 'graham@hotify.com'}</span>
                     </div>
