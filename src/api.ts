@@ -14,6 +14,7 @@ export interface UserProfile {
   language?: string;
   preference?: 'bright' | 'dark';
   userType?: 'user' | 'admin';
+  audioOut?: 'device' | 'server';
   createdAt?: string;
   updatedAt?: string;
 }
@@ -115,8 +116,23 @@ class ApiClient {
     const fullUrl = url;
     const response = await fetch(fullUrl, { credentials: 'include', ...options, headers });
 
-    // Handle 401 Unauthorized (Expired access token)
-    if (response.status === 401 && !options._retry && !url.includes('/auth/request/login') && !url.includes('/auth/confirm/login') && !url.includes('/auth/signup')) {
+    let responseClone = response.clone();
+    let data: any = {};
+    let text = '';
+    try {
+      text = await responseClone.text();
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = { message: text };
+    }
+
+    const isJwtError = 
+      response.status === 401 || 
+      response.status === 403 || 
+      (data && data.message && typeof data.message === 'string' && data.message.toLowerCase().includes('jwt'));
+
+    // Handle Expired access token / no JWT
+    if (isJwtError && !options._retry && !url.includes('/auth/request/login') && !url.includes('/auth/confirm/login') && !url.includes('/auth/signup')) {
       options._retry = true;
       try {
         const refreshed = await this.refreshToken();
@@ -133,7 +149,10 @@ class ApiClient {
       }
     }
 
-    return await this.handleResponse(response);
+    if (!response.ok) {
+      throw new Error(data.message || data.error || `HTTP error! Status: ${response.status}`);
+    }
+    return data;
   }
 
   private async handleResponse(response: Response): Promise<any> {
@@ -366,6 +385,28 @@ class ApiClient {
     return this.request('/song/lyrics', {
       method: 'POST',
       body: JSON.stringify({ songId }),
+    });
+  }
+
+  // Server Streaming API Calls
+  async startServerStreaming(): Promise<any> {
+    return this.request('/server/streaming/start', { method: 'POST' });
+  }
+
+  async stopServerStreaming(): Promise<any> {
+    return this.request('/server/streaming/stop', { method: 'POST' });
+  }
+
+  async playServerStream(songId: string): Promise<any> {
+    return this.request(`/server/streaming/play/${songId}`, { method: 'POST' });
+  }
+
+  async controlServerStream(action: string, value?: number): Promise<any> {
+    const body: any = { action };
+    if (value !== undefined) body.value = value;
+    return this.request('/server/streaming/control', {
+      method: 'POST',
+      body: JSON.stringify(body),
     });
   }
 

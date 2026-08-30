@@ -12,6 +12,7 @@ import {
   Plus,
   ShieldCheck,
   Music,
+  Sliders,
   Clock,
   Copy,
   Check,
@@ -43,7 +44,8 @@ export const MainContent: React.FC = () => {
     isPlaying,
     togglePlay,
     theme,
-    toggleTheme
+    toggleTheme,
+    toggleAudioMode
   } = useApp();
 
   useEffect(() => {
@@ -2450,7 +2452,9 @@ export const MainContent: React.FC = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '100%'
+                width: '100%',
+                boxSizing: 'border-box',
+                minWidth: 0
               }}>
                 {/* Avatar */}
                 <div style={{
@@ -2473,53 +2477,91 @@ export const MainContent: React.FC = () => {
                   {(userProfile?.firstName || 'P').charAt(0).toUpperCase()}
                 </div>
 
-                {/* Profile details card */}
                 <div style={{
                   backgroundColor: 'var(--bg-card)',
                   border: '1px solid var(--border-color)',
                   borderRadius: '12px',
-                  padding: '32px',
+                  padding: '24px',
                   width: '100%',
+                  boxSizing: 'border-box',
                   boxShadow: '0 4px 12px var(--shadow-color)'
                 }}>
                   <h2 style={{ fontSize: '1.4rem', marginBottom: '24px', fontWeight: 800, letterSpacing: '-0.5px', textAlign: 'center' }}>
                     Profile Details
                   </h2>
                   
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>Email</span>
-                      <span style={{ fontWeight: 600 }}>{userProfile?.email || 'graham@hotify.com'}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', minWidth: 0 }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', flexShrink: 0 }}>Email</span>
+                      <span style={{ fontWeight: 600, wordBreak: 'break-all', textAlign: 'right', minWidth: 0 }}>{userProfile?.email || 'graham@hotify.com'}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>First Name</span>
-                      <span style={{ fontWeight: 600 }}>{userProfile?.firstName || 'Graham'}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', minWidth: 0 }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', flexShrink: 0 }}>First Name</span>
+                      <span style={{ fontWeight: 600, wordBreak: 'break-word', textAlign: 'right', minWidth: 0 }}>{userProfile?.firstName || 'Graham'}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>Last Name</span>
-                      <span style={{ fontWeight: 600 }}>{userProfile?.lastName || 'Nickbel'}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', minWidth: 0 }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', flexShrink: 0 }}>Last Name</span>
+                      <span style={{ fontWeight: 600, wordBreak: 'break-word', textAlign: 'right', minWidth: 0 }}>{userProfile?.lastName || 'Nickbel'}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>Gender</span>
-                      <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{userProfile?.gender || 'prefer-not-to-say'}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', minWidth: 0 }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', flexShrink: 0 }}>Gender</span>
+                      <span style={{ fontWeight: 600, textTransform: 'capitalize', textAlign: 'right', minWidth: 0 }}>{userProfile?.gender || 'prefer-not-to-say'}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>Language</span>
-                      <span style={{ fontWeight: 600 }}>{userProfile?.language || 'English'}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', minWidth: 0 }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', flexShrink: 0 }}>Language</span>
+                      <span style={{ fontWeight: 600, textAlign: 'right', minWidth: 0 }}>{userProfile?.language || 'English'}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>User Role</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', minWidth: 0 }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', flexShrink: 0 }}>User Role</span>
                       <span style={{
                         fontWeight: 700,
                         textTransform: 'uppercase',
                         color: userProfile?.userType === 'admin' ? 'var(--accent-green)' : 'var(--text-main)',
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'flex-end',
                         gap: '4px'
                       }}>
                         {userProfile?.userType === 'admin' && <ShieldCheck size={16} />}
                         {userProfile?.userType || 'user'}
                       </span>
+                    </div>
+                  </div>
+
+                  <div className="show-on-mobile" style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    marginTop: '24px',
+                    padding: '16px',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '8px',
+                    cursor: 'pointer'
+                  }} onClick={(e) => { e.stopPropagation(); toggleAudioMode(); }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <Music size={20} style={{ color: userProfile?.audioOut === 'server' ? 'var(--accent-green)' : 'var(--text-secondary)' }} />
+                      <span style={{ fontWeight: 600 }}>Remote Audio</span>
+                    </div>
+                    
+                    <div style={{
+                      width: '44px',
+                      height: '24px',
+                      backgroundColor: userProfile?.audioOut === 'server' ? 'var(--accent-green)' : 'var(--border-color)',
+                      borderRadius: '24px',
+                      position: 'relative',
+                      transition: 'background-color 0.3s ease'
+                    }}>
+                      <div style={{
+                        width: '20px',
+                        height: '20px',
+                        backgroundColor: '#fff',
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        top: '2px',
+                        left: userProfile?.audioOut === 'server' ? '22px' : '2px',
+                        transition: 'left 0.3s ease',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                      }} />
                     </div>
                   </div>
 

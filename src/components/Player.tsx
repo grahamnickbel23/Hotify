@@ -33,7 +33,9 @@ export const Player: React.FC = () => {
     setRepeat,
     setPlaybackQuality,
     isLyricsOpen,
-    setIsLyricsOpen
+    setIsLyricsOpen,
+    userProfile,
+    toggleAudioMode
   } = useApp();
 
   const [prevVolume, setPrevVolume] = useState(volume);
@@ -98,7 +100,11 @@ export const Player: React.FC = () => {
   }, [showQualityMenu]);
 
   const progressPercent = playbackDuration > 0 ? (playbackProgress / playbackDuration) * 100 : 0;
-  const volumePercent = volume * 100;
+  
+  const isServerAudio = userProfile?.audioOut === 'server';
+  const maxVolume = isServerAudio ? 200 : 1;
+  const volumeStep = isServerAudio ? 1 : 0.01;
+  const volumePercent = isServerAudio ? (volume / 200) * 100 : (volume * 100);
 
   return (
     <div className="player-bar">
@@ -373,7 +379,7 @@ export const Player: React.FC = () => {
           </div>
 
           {/* Volume controls */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '120px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: isServerAudio ? '160px' : '120px' }}>
             <button onClick={toggleMute} className="player-control-btn" style={{ opacity: 0.8 }}>
               {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
             </button>
@@ -381,8 +387,8 @@ export const Player: React.FC = () => {
             <input
               type="range"
               min="0"
-              max="1"
-              step="0.01"
+              max={maxVolume}
+              step={volumeStep}
               value={volume}
               onChange={handleVolumeChange}
               className="playback-progressbar"
@@ -391,6 +397,36 @@ export const Player: React.FC = () => {
                 '--progress-percent': `${volumePercent}%`
               } as React.CSSProperties}
             />
+            {isServerAudio && <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{Math.round(volume)}</span>}
+          </div>
+
+          {/* Audio Output Toggle Switch */}
+          <div 
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px', cursor: 'pointer' }}
+            onClick={(e) => { e.stopPropagation(); toggleAudioMode(); }}
+            title={isServerAudio ? "Audio Output: Server" : "Audio Output: Device"}
+          >
+            <Music size={16} style={{ color: isServerAudio ? 'var(--accent-green)' : 'var(--text-secondary)' }} />
+            <div style={{
+              width: '36px',
+              height: '20px',
+              backgroundColor: isServerAudio ? 'var(--accent-green)' : 'var(--border-color)',
+              borderRadius: '20px',
+              position: 'relative',
+              transition: 'background-color 0.3s ease'
+            }}>
+              <div style={{
+                width: '16px',
+                height: '16px',
+                backgroundColor: '#fff',
+                borderRadius: '50%',
+                position: 'absolute',
+                top: '2px',
+                left: isServerAudio ? '18px' : '2px',
+                transition: 'left 0.3s ease',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+              }} />
+            </div>
           </div>
         </div>
 
@@ -453,13 +489,14 @@ export const Player: React.FC = () => {
               <input
                 type="range"
                 min="0"
-                max="1"
-                step="0.01"
+                max={maxVolume}
+                step={volumeStep}
                 value={volume}
                 onChange={handleVolumeChange}
                 className="playback-progressbar"
                 style={{ flex: 1, '--progress-percent': `${volumePercent}%` } as React.CSSProperties}
               />
+              {isServerAudio && <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{Math.round(volume)}</span>}
             </div>
 
             <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>

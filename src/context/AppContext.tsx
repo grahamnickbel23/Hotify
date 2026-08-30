@@ -71,6 +71,9 @@ interface AppContextType {
   setPlaybackQuality: (quality: '32' | '64' | '128') => void;
   isLyricsOpen: boolean;
   setIsLyricsOpen: (open: boolean) => void;
+  
+  // Audio Mode Toggle
+  toggleAudioMode: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -143,6 +146,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     playbackQualityRef.current = playbackQuality;
   }, [playbackQuality]);
+  const playbackDurationRef = useRef(playbackDuration);
+  useEffect(() => {
+    playbackDurationRef.current = playbackDuration;
+  }, [playbackDuration]);
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
 
   // Playback Queue
@@ -153,6 +160,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // DASH player references
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playerRef = useRef<dashjs.MediaPlayerClass | null>(null);
+
+  // WebSocket for server player
+  const wsRef = useRef<WebSocket | null>(null);
 
   // Theme Toggler
   const toggleTheme = () => {
@@ -171,8 +181,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Auth Functions
   const checkAuthOnMount = async () => {
     try {
-      const data = await api.getProfile();
-      handleLoginSuccess(data.user);
+      const data = await api.getProfile() as any;
+      handleLoginSuccess(data.profile || data.user);
     } catch (err) {
       // Access token failed or missing, try refresh token up to 2 times
       let refreshed = false;
@@ -181,8 +191,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const refreshRes = await api.refreshToken();
           // If we successfully get a token (or it sets a cookie), try getting profile
           if (refreshRes) {
-            const data = await api.getProfile();
-            handleLoginSuccess(data.user);
+            const data = await api.getProfile() as any;
+            handleLoginSuccess(data.profile || data.user);
             refreshed = true;
             break;
           }
@@ -239,6 +249,73 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsPlaying(false);
     }
   };
+
+  const toggleAudioMode = async () => {
+    try {
+      if (userProfile?.audioOut === 'server') {
+        await api.stopServerStreaming();
+      } else {
+        await api.startServerStreaming();
+      }
+      // Fetch updated profile
+      const data = await api.getProfile() as any;
+      setUserProfile(data.profile || data.user);
+    } catch (err) {
+      console.error('Failed to toggle audio mode', err);
+    }
+  };
+
+  // WebSocket for server player progress
+  useEffect(() => {
+    if (userProfile?.audioOut === 'server') {
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${wsProtocol}//${window.location.host}/ws/server-player`;
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      let triggeredNext = false;
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'player-update') {
+            if (data.property === 'time-pos') {
+              setPlaybackProgress(data.value);
+              // Reset trigger when a new song starts
+              if (data.value < 2) {
+                triggeredNext = false;
+              }
+              // Fallback heuristic if we don't get an explicit end event, 
+              // but we know the duration and we're within 0.5s of the end.
+              const currentDur = playbackDurationRef.current;
+              if (currentDur > 0 && data.value >= currentDur - 0.5 && !triggeredNext) {
+                triggeredNext = true;
+                nextTrackRef.current();
+              }
+            } else if (data.property === 'duration' || data.property === 'length') {
+              setPlaybackDuration(data.value);
+            } else if (data.property === 'eof-reached' && data.value === true && !triggeredNext) {
+              triggeredNext = true;
+              nextTrackRef.current();
+            }
+          } else if (data.type === 'event' && data.event === 'end-file' && !triggeredNext) {
+            // Some MPV wrappers send this event
+            const reason = data.reason || (data.data && data.data.reason);
+            if (reason === 'eof' || reason === undefined) {
+              triggeredNext = true;
+              nextTrackRef.current();
+            }
+          }
+        } catch (e) {
+          // ignore parsing error
+        }
+      };
+
+      return () => {
+        ws.close();
+        wsRef.current = null;
+      };
+    }
+  }, [userProfile?.audioOut]);
 
   // Data Refresh functions
   const refreshSongs = async () => {
@@ -396,14 +473,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Adjust audio tag volume
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = volume;
+      audioRef.current.volume = Math.max(0, Math.min(1, volume));
     }
   }, [volume]);
 
   // Play a song
-  const playSong = (song: Song, contextSongs: Song[] = [], playlistContextId: string | null = null) => {
-    if (!audioRef.current || !playerRef.current) return;
-
+  const playSong = async (song: Song, contextSongs: Song[] = [], playlistContextId: string | null = null) => {
     setCurrentSong(song);
     setIsPlaying(true);
 
@@ -428,15 +503,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Failed to fetch song details:', err);
     });
 
-    const manifestUrl = api.getManifestUrl(song._id);
-    playerRef.current.attachSource(manifestUrl);
+    if (userProfile?.audioOut === 'server') {
+      try {
+        await api.playServerStream(song._id);
+        // Set duration for remote stream fallback heuristic
+        setPlaybackDuration(song.duration || song.audioLength || 0);
+        // Default to 100 on new song as per user instruction
+        setVolumeState(100);
+        await api.controlServerStream('volume', 100);
+      } catch (err) {
+        console.warn('Server stream failed:', err);
+      }
+    } else {
+      if (!audioRef.current || !playerRef.current) return;
+      const manifestUrl = api.getManifestUrl(song._id);
+      playerRef.current.attachSource(manifestUrl);
 
-    // Apply active quality logic
-    updateQualitySettings(playbackQuality);
+      // Apply active quality logic
+      updateQualitySettings(playbackQuality);
 
-    audioRef.current.play().catch(err => {
-      console.warn('Auto-play blocked by browser or failed stream:', err);
-    });
+      audioRef.current.play().catch(err => {
+        console.warn('Auto-play blocked by browser or failed stream:', err);
+      });
+    }
   };
 
   // Handle quality settings for MPEG-DASH
@@ -488,29 +577,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const setPlaybackQuality = (quality: '32' | '64' | '128') => {
     setPlaybackQualityState(quality);
-    updateQualitySettings(quality, true);
+    if (userProfile?.audioOut !== 'server') {
+      updateQualitySettings(quality, true);
+    }
   };
 
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
+  const togglePlay = async () => {
+    if (userProfile?.audioOut === 'server') {
+      if (isPlaying) {
+        await api.controlServerStream('pause');
+        setIsPlaying(false);
+      } else {
+        if (currentSong) {
+          await api.controlServerStream('resume');
+          setIsPlaying(true);
+        } else if (songs.length > 0) {
+          playSong(songs[0], songs);
+        }
+      }
     } else {
-      if (currentSong) {
-        audioRef.current.play().catch(console.warn);
-        setIsPlaying(true);
-      } else if (songs.length > 0) {
-        playSong(songs[0], songs);
+      if (!audioRef.current) return;
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        if (currentSong) {
+          audioRef.current.play().catch(console.warn);
+          setIsPlaying(true);
+        } else if (songs.length > 0) {
+          playSong(songs[0], songs);
+        }
       }
     }
   };
 
   const seekTo = (time: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-      setPlaybackProgress(time);
+    if (userProfile?.audioOut === 'server') {
+      api.controlServerStream('seek', time);
+    } else {
+      if (audioRef.current) {
+        audioRef.current.currentTime = time;
+      }
     }
+    setPlaybackProgress(time);
   };
 
   // Next Track logic (incorporates Autoplay microservice endpoint)
@@ -574,8 +683,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setVolume = (vol: number) => {
-    const clamped = Math.max(0, Math.min(1, vol));
-    setVolumeState(clamped);
+    if (userProfile?.audioOut === 'server') {
+      const clamped = Math.max(0, Math.min(200, vol));
+      setVolumeState(clamped);
+      api.controlServerStream('volume', clamped);
+    } else {
+      const clamped = Math.max(0, Math.min(1, vol));
+      setVolumeState(clamped);
+    }
   };
 
   // Keep ref to latest nextTrack to avoid destroying player/audio element on queue/state updates
@@ -729,7 +844,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setRepeat,
       setPlaybackQuality,
       isLyricsOpen,
-      setIsLyricsOpen
+      setIsLyricsOpen,
+      toggleAudioMode
     }}>
       {children}
     </AppContext.Provider>

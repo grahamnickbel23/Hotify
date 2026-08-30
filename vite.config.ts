@@ -49,6 +49,18 @@ export default defineConfig({
         target: 'http://100.123.126.113:8001',
         changeOrigin: true,
         bypass: htmlBypass
+      },
+      
+      '/server': {
+        target: 'http://100.123.126.113:8001',
+        changeOrigin: true,
+        bypass: htmlBypass
+      },
+
+      '/ws': {
+        target: 'ws://100.123.126.113:8001',
+        changeOrigin: true,
+        ws: true
       }
     }
   }
