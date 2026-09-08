@@ -265,55 +265,150 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // WebSocket for server player progress
+  const serverLastSyncTimeRef = useRef(0);
+  const serverLastSyncPosRef = useRef(0);
+  const isServerPlayingRef = useRef(false);
+
+  const syncServerState = async () => {
+    if (userProfile?.audioOut !== 'server') return;
+    try {
+      const res = await api.getServerStreamingState();
+      if (res.success && res.state) {
+        serverLastSyncTimeRef.current = performance.now();
+        serverLastSyncPosRef.current = res.state.position;
+        isServerPlayingRef.current = !res.state.paused;
+        
+        setPlaybackProgress(res.state.position);
+        if (res.state.duration > 0) {
+          setPlaybackDuration(res.state.duration);
+        }
+        setIsPlaying(!res.state.paused);
+
+        // If the page was just reloaded, the local currentSong is null.
+        // We extract the song name from the MPV path and fetch its real details from the DB.
+        if (res.state && res.state.path) {
+          const parts = res.state.path.split('/');
+          const rawSongName = parts.length > 1 ? parts[parts.length - 2] : null;
+          const songName = rawSongName ? decodeURIComponent(rawSongName) : null;
+            
+          if (songName) {
+            api.getSongDetailsByName(songName).then(songRes => {
+              // Some APIs might not return success boolean consistently, so just check if song exists
+              if (songRes.song) {
+                setCurrentSong(prev => {
+                  if (!prev) {
+                    setVolumeState(100);
+                    api.controlServerStream('volume', 100).catch(console.warn);
+                    return songRes.song;
+                  }
+                  return prev;
+                });
+              }
+            }).catch(e => console.warn('Failed to fetch reloaded song details', e));
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to sync server state", e);
+    }
+  };
+
+  // WebSocket and visibility for server player progress
   useEffect(() => {
     if (userProfile?.audioOut === 'server') {
+      let reconnectTimeout: any;
+      let triggeredNext = false;
       const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${wsProtocol}//${window.location.host}/ws/server-player`;
-      const ws = new WebSocket(wsUrl);
-      wsRef.current = ws;
+      
+      const connectWs = () => {
+        syncServerState();
+        const ws = new WebSocket(wsUrl);
+        wsRef.current = ws;
 
-      let triggeredNext = false;
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === 'player-update') {
-            if (data.property === 'time-pos') {
-              setPlaybackProgress(data.value);
-              // Reset trigger when a new song starts
-              if (data.value < 2) {
-                triggeredNext = false;
-              }
-              // Fallback heuristic if we don't get an explicit end event, 
-              // but we know the duration and we're within 0.5s of the end.
-              const currentDur = playbackDurationRef.current;
-              if (currentDur > 0 && data.value >= currentDur - 0.5 && !triggeredNext) {
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'player-update') {
+              if (data.property === 'time-pos') {
+                serverLastSyncTimeRef.current = performance.now();
+                serverLastSyncPosRef.current = data.value;
+                setPlaybackProgress(data.value);
+                
+                if (data.value < 2) {
+                  triggeredNext = false;
+                }
+                const currentDur = playbackDurationRef.current;
+                if (currentDur > 0 && data.value >= currentDur - 0.5 && !triggeredNext) {
+                  triggeredNext = true;
+                  nextTrackRef.current();
+                }
+              } else if (data.property === 'duration' || data.property === 'length') {
+                setPlaybackDuration(data.value);
+              } else if (data.property === 'pause') {
+                isServerPlayingRef.current = !data.value;
+                setIsPlaying(!data.value);
+                serverLastSyncTimeRef.current = performance.now();
+              } else if (data.property === 'eof-reached' && data.value === true && !triggeredNext) {
                 triggeredNext = true;
                 nextTrackRef.current();
               }
-            } else if (data.property === 'duration' || data.property === 'length') {
-              setPlaybackDuration(data.value);
-            } else if (data.property === 'eof-reached' && data.value === true && !triggeredNext) {
-              triggeredNext = true;
-              nextTrackRef.current();
+            } else if (data.type === 'event' && data.event === 'end-file' && !triggeredNext) {
+              const reason = data.reason || (data.data && data.data.reason);
+              if (reason === 'eof' || reason === undefined) {
+                triggeredNext = true;
+                nextTrackRef.current();
+              }
+            } else if (data.type === 'song-loaded') {
+              triggeredNext = false;
+              syncServerState();
             }
-          } else if (data.type === 'event' && data.event === 'end-file' && !triggeredNext) {
-            // Some MPV wrappers send this event
-            const reason = data.reason || (data.data && data.data.reason);
-            if (reason === 'eof' || reason === undefined) {
-              triggeredNext = true;
-              nextTrackRef.current();
-            }
+          } catch (e) {
+            // ignore
           }
-        } catch (e) {
-          // ignore parsing error
+        };
+
+        ws.onclose = () => {
+          reconnectTimeout = setTimeout(connectWs, 3000);
+        };
+      };
+      
+      connectWs();
+
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+          syncServerState();
         }
       };
+      document.addEventListener('visibilitychange', handleVisibilityChange);
 
       return () => {
-        ws.close();
-        wsRef.current = null;
+        clearTimeout(reconnectTimeout);
+        if (wsRef.current) {
+          wsRef.current.onclose = null;
+          wsRef.current.close();
+          wsRef.current = null;
+        }
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
       };
+    }
+  }, [userProfile?.audioOut]);
+
+  // Local interpolation for server player
+  useEffect(() => {
+    if (userProfile?.audioOut === 'server') {
+      let animationFrameId: number;
+      const loop = () => {
+        if (isServerPlayingRef.current) {
+          const now = performance.now();
+          const elapsed = (now - serverLastSyncTimeRef.current) / 1000;
+          const newPos = serverLastSyncPosRef.current + elapsed;
+          setPlaybackProgress(newPos);
+        }
+        animationFrameId = requestAnimationFrame(loop);
+      };
+      animationFrameId = requestAnimationFrame(loop);
+      return () => cancelAnimationFrame(animationFrameId);
     }
   }, [userProfile?.audioOut]);
 
@@ -506,11 +601,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (userProfile?.audioOut === 'server') {
       try {
         await api.playServerStream(song._id);
-        // Set duration for remote stream fallback heuristic
-        setPlaybackDuration(song.duration || song.audioLength || 0);
         // Default to 100 on new song as per user instruction
         setVolumeState(100);
         await api.controlServerStream('volume', 100);
+        // Duration and progress will be synced by syncServerState or websocket updates
+        setPlaybackDuration(0);
+        setPlaybackProgress(0);
+        isServerPlayingRef.current = true;
       } catch (err) {
         console.warn('Server stream failed:', err);
       }

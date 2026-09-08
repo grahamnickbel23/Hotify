@@ -27,6 +27,7 @@ export interface Song {
   duration?: number; // in seconds
   fileName?: string;
   coverUrl?: string; // custom cover image
+  assetUrl?: string; // Spotify-style asset URL
   url?: string; // manifest path
   firstSinger?: string;
   otherSinger?: string[];
@@ -259,6 +260,17 @@ class ApiClient {
     };
   }
 
+  async getSongDetailsByName(SongName: string): Promise<{ success: boolean; message: string; songInfo: Song; song: Song; lyricsInfo?: LyricsInfo }> {
+    const data = await this.request('/song/read', {
+      method: 'POST',
+      body: JSON.stringify({ SongName }),
+    });
+    return {
+      ...data,
+      song: data.songInfo || data.song,
+    };
+  }
+
   async uploadSong(formData: FormData): Promise<{ message: string; song: Song }> {
     // For multipart uploads, don't set JSON Content-Type, let the browser define it
     const accessToken = this.getAccessToken();
@@ -389,7 +401,12 @@ class ApiClient {
   }
 
   // Server Streaming API Calls
-  async startServerStreaming(): Promise<any> {
+  // Server remote streaming APIs
+  async getServerStreamingState(): Promise<{ success: boolean; running: boolean; state?: { position: number; duration: number; paused: boolean; path: string } }> {
+    return this.request('/server/streaming/state', { method: 'GET' });
+  }
+
+  async startServerStreaming(): Promise<{ success: boolean }> {
     return this.request('/server/streaming/start', { method: 'POST' });
   }
 

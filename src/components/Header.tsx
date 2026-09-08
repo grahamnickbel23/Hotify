@@ -14,7 +14,6 @@ export const Header: React.FC = () => {
     playSong,
     currentSong,
     setIsCreateMenuOpen,
-    isMobileDrawerOpen,
     setIsMobileDrawerOpen
   } = useApp();
 
@@ -190,17 +189,11 @@ export const Header: React.FC = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
                       {/* Cover art thumbnail */}
                       <div style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '4px',
-                        backgroundColor: 'var(--bg-card-hover)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        background: song.coverUrl ? `url(${song.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
+                        width: '40px', height: '40px', borderRadius: '4px', flexShrink: 0,
+                        background: (song.assetUrl || song.coverUrl) ? `url(${song.assetUrl || song.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
                       }}>
-                        {!song.coverUrl && <Music size={16} style={{ color: '#fff' }} />}
+                        {!(song.assetUrl || song.coverUrl) && <Music size={16} style={{ color: '#fff' }} />}
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>

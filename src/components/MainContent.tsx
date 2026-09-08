@@ -12,7 +12,6 @@ import {
   Plus,
   ShieldCheck,
   Music,
-  Sliders,
   Clock,
   Copy,
   Check,
@@ -169,7 +168,7 @@ export const MainContent: React.FC = () => {
     }
   };
 
-  const handleSwipeEnd = (e: React.TouchEvent, song: Song) => {
+  const handleSwipeEnd = (_e: React.TouchEvent, song: Song) => {
     if (window.innerWidth > 768 || swipeStartX === null || swipedSongId !== song._id) return;
     if (swipeOffset > 60) {
       setSwipeActionSong(song);
@@ -205,6 +204,7 @@ export const MainContent: React.FC = () => {
     movieName: '',
     actor: '',
     sourceUrl: '',
+    assetUrl: '',
     language: '',
     originCountry: ''
   });
@@ -221,6 +221,7 @@ export const MainContent: React.FC = () => {
       movieName: detailedSong.movieName || '',
       actor: (detailedSong.actor && detailedSong.actor.length > 0) ? detailedSong.actor.join(', ') : '',
       sourceUrl: detailedSong.sourceUrl || '',
+      assetUrl: detailedSong.assetUrl || '',
       language: detailedSong.language || '',
       originCountry: detailedSong.originCountry || ''
     });
@@ -266,6 +267,7 @@ export const MainContent: React.FC = () => {
       addIfChanged('musicLabel', editFormData.musicLabel, detailedSong.musicLabel || '');
       addIfChanged('movieName', editFormData.movieName, detailedSong.movieName || '');
       addIfChanged('sourceUrl', editFormData.sourceUrl, detailedSong.sourceUrl || '');
+      addIfChanged('assetUrl', editFormData.assetUrl, detailedSong.assetUrl || '');
       addIfChanged('language', editFormData.language, detailedSong.language || '');
       addIfChanged('originCountry', editFormData.originCountry, detailedSong.originCountry || '');
 
@@ -365,6 +367,7 @@ export const MainContent: React.FC = () => {
   const [songMovieName, setSongMovieName] = useState('');
   const [songActor, setSongActor] = useState('');
   const [songSourceUrl, setSongSourceUrl] = useState('');
+  const [songAssetUrl, setSongAssetUrl] = useState('');
   const [songLanguage, setSongLanguage] = useState('');
   const [songOriginCountry, setSongOriginCountry] = useState('');
   const [songFile, setSongFile] = useState<File | null>(null);
@@ -591,6 +594,9 @@ export const MainContent: React.FC = () => {
     if (songSourceUrl.trim()) {
       formData.append('sourceUrl', songSourceUrl.trim());
     }
+    if (songAssetUrl.trim()) {
+      formData.append('assetUrl', songAssetUrl.trim());
+    }
     if (songLanguage.trim()) {
       formData.append('language', songLanguage.trim());
     }
@@ -633,6 +639,7 @@ export const MainContent: React.FC = () => {
       setSongMovieName('');
       setSongActor('');
       setSongSourceUrl('');
+      setSongAssetUrl('');
       setSongLanguage('');
       setSongOriginCountry('');
       setSongFile(null);
@@ -691,7 +698,8 @@ export const MainContent: React.FC = () => {
           if (res.playlist.songs && Array.isArray(res.playlist.songs)) {
             res.playlist.songs.forEach((item: any) => {
               if (item.songId && typeof item.songId === 'object') {
-                validSongs.push(item.songId);
+                const fullSong = songs.find(s => s._id === item.songId._id) || item.songId;
+                validSongs.push(fullSong);
               }
             });
           }
@@ -847,7 +855,6 @@ export const MainContent: React.FC = () => {
                           onClick={() => {
                             playSong(song, songs);
                           }}
-                          className={`song-row ${isCurrent ? 'active' : ''}`}
                         >
                           <td className="index-cell" style={{ width: '60px', textAlign: 'center' }}>
                             {isCurrent ? (
@@ -874,14 +881,14 @@ export const MainContent: React.FC = () => {
                                 justifyContent: 'center',
                                 flexShrink: 0,
                                 cursor: 'pointer',
-                                background: song.coverUrl ? `url(${song.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
+                                background: (song.assetUrl || song.coverUrl) ? `url(${song.assetUrl || song.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
                               }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedSongId(song._id);
                                 setActiveSection('song-detail');
                               }}>
-                                {!song.coverUrl && <Music size={18} style={{ color: '#fff' }} />}
+                                {!(song.assetUrl || song.coverUrl) && <Music size={18} style={{ color: '#fff' }} />}
                               </div>
 
                               <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
@@ -1106,7 +1113,6 @@ export const MainContent: React.FC = () => {
                                   const allSongs = historyList.map(item => resolveFullSong(item.song)).filter((s): s is Song => s !== null);
                                   playSong(fullSong, allSongs);
                                 }}
-                                className={`song-row ${isCurrent ? 'active' : ''}`}
                               >
                                 <td className="index-cell hide-on-mobile" style={{ width: '60px', textAlign: 'center' }}>
                                   {isCurrent ? (
@@ -1131,9 +1137,9 @@ export const MainContent: React.FC = () => {
                                       alignItems: 'center',
                                       justifyContent: 'center',
                                       flexShrink: 0,
-                                      background: fullSong.coverUrl ? `url(${fullSong.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
+                                      background: (fullSong.assetUrl || fullSong.coverUrl) ? `url(${fullSong.assetUrl || fullSong.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
                                     }}>
-                                      {!fullSong.coverUrl && <Music size={18} style={{ color: '#fff' }} />}
+                                      {!(fullSong.assetUrl || fullSong.coverUrl) && <Music size={18} style={{ color: '#fff' }} />}
                                     </div>
 
                                     <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
@@ -1245,8 +1251,8 @@ export const MainContent: React.FC = () => {
                 <tbody>
                   {searchHistoryList.map((entry, idx) => {
                     const songData = entry.result || entry.songId;
-                    const resolvedSong = typeof songData === 'object' && songData 
-                      ? songData 
+                    const resolvedSong = (typeof songData === 'object' && songData)
+                      ? (songs.find((s: any) => s._id === songData._id) || songData)
                       : songs.find((s: any) => s._id === songData);
                     
                     const isCurrent = currentSong && resolvedSong && currentSong._id === resolvedSong._id;
@@ -1263,8 +1269,6 @@ export const MainContent: React.FC = () => {
                             playSong(resolvedSong, songs);
                           }
                         }}
-                        className={`song-row ${isCurrent ? 'active' : ''}`}
-                        style={{ cursor: resolvedSong ? 'pointer' : 'default' }}
                       >
                         {/* Desktop Cells */}
                         <td className="index-cell hide-on-mobile" style={{ width: '60px', textAlign: 'center' }}>
@@ -1282,9 +1286,9 @@ export const MainContent: React.FC = () => {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 flexShrink: 0,
-                                background: resolvedSong.coverUrl ? `url(${resolvedSong.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
+                                background: (resolvedSong.assetUrl || resolvedSong.coverUrl) ? `url(${resolvedSong.assetUrl || resolvedSong.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
                               }}>
-                                {!resolvedSong.coverUrl && <Music size={18} style={{ color: '#fff' }} />}
+                                {!(resolvedSong.assetUrl || resolvedSong.coverUrl) && <Music size={18} style={{ color: '#fff' }} />}
                               </div>
                               <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                                 <span style={{
@@ -1325,9 +1329,9 @@ export const MainContent: React.FC = () => {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 flexShrink: 0,
-                                background: resolvedSong.coverUrl ? `url(${resolvedSong.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
+                                background: (resolvedSong.assetUrl || resolvedSong.coverUrl) ? `url(${resolvedSong.assetUrl || resolvedSong.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
                               }}>
-                                {!resolvedSong.coverUrl && <Music size={18} style={{ color: '#fff' }} />}
+                                {!(resolvedSong.assetUrl || resolvedSong.coverUrl) && <Music size={18} style={{ color: '#fff' }} />}
                               </div>
                               <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                                 <span style={{
@@ -1468,7 +1472,6 @@ export const MainContent: React.FC = () => {
                         onClick={() => {
                           playSong(song, playlistSongs, selectedPlaylistId);
                         }}
-                        className={`song-row ${isCurrent ? 'active' : ''}`}
                       >
                         <td className="index-cell" style={{ width: '60px', textAlign: 'center' }}>
                           {isCurrent ? (
@@ -1494,14 +1497,14 @@ export const MainContent: React.FC = () => {
                               justifyContent: 'center',
                               flexShrink: 0,
                               cursor: 'pointer',
-                              background: song.coverUrl ? `url(${song.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
+                              background: (song.assetUrl || song.coverUrl) ? `url(${song.assetUrl || song.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedSongId(song._id);
                               setActiveSection('song-detail');
                             }}>
-                              {!song.coverUrl && <Music size={18} style={{ color: '#fff' }} />}
+                              {!(song.assetUrl || song.coverUrl) && <Music size={18} style={{ color: '#fff' }} />}
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
                               <span className="song-title-main" style={{
@@ -1607,8 +1610,8 @@ export const MainContent: React.FC = () => {
                     width: '320px',
                     height: '320px',
                     borderRadius: '12px',
-                    background: detailedSong.coverUrl 
-                      ? `url(${detailedSong.coverUrl}) center/cover no-repeat` 
+                    background: (detailedSong.assetUrl || detailedSong.coverUrl) 
+                      ? `url(${detailedSong.assetUrl || detailedSong.coverUrl}) center/cover no-repeat` 
                       : 'linear-gradient(135deg, #1db954 0%, #191414 100%)',
                     boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
                     display: 'flex',
@@ -1617,7 +1620,7 @@ export const MainContent: React.FC = () => {
                     color: '#ffffff',
                     position: 'relative'
                   }}>
-                    {!detailedSong.coverUrl && (
+                    {!(detailedSong.assetUrl || detailedSong.coverUrl) && (
                       <Music size={80} style={{ opacity: 0.8 }} />
                     )}
                   </div>
@@ -2274,6 +2277,33 @@ export const MainContent: React.FC = () => {
                           onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)'}
                         />
                       </div>
+
+                      {/* Asset URL */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          Asset URL (Image)
+                        </label>
+                        <input
+                          type="text"
+                          value={editFormData.assetUrl}
+                          onChange={(e) => handleEditFormChange('assetUrl', e.target.value)}
+                          placeholder="e.g. https://i.scdn.co/image/..."
+                          style={{
+                            backgroundColor: '#242424',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            borderRadius: '8px',
+                            padding: '12px 14px',
+                            color: '#ffffff',
+                            fontSize: '0.95rem',
+                            outline: 'none',
+                            transition: 'border-color 0.2s',
+                            width: '100%',
+                            boxSizing: 'border-box'
+                          }}
+                          onFocus={(e) => e.currentTarget.style.borderColor = '#1db954'}
+                          onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)'}
+                        />
+                      </div>
                     </div>
 
                     {/* Modal Footer */}
@@ -2714,9 +2744,9 @@ export const MainContent: React.FC = () => {
                               alignItems: 'center',
                               justifyContent: 'center',
                               flexShrink: 0,
-                              background: song.coverUrl ? `url(${song.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
+                              background: (song.assetUrl || song.coverUrl) ? `url(${song.assetUrl || song.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #1db954 0%, #191414 100%)'
                             }}>
-                              {!song.coverUrl && <Music size={16} style={{ color: '#fff' }} />}
+                              {!(song.assetUrl || song.coverUrl) && <Music size={16} style={{ color: '#fff' }} />}
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
@@ -3391,6 +3421,30 @@ export const MainContent: React.FC = () => {
                         placeholder="e.g. https://www.youtube.com/watch?v=..."
                         value={songSourceUrl}
                         onChange={(e) => setSongSourceUrl(e.target.value)}
+                        className="gold-field-input"
+                        style={{
+                          border: 'none',
+                          borderBottom: '2px solid #b38728',
+                          background: 'transparent',
+                          color: '#ffffff',
+                          fontSize: '1.1rem',
+                          padding: '10px 4px',
+                          width: '100%',
+                          outline: 'none',
+                          textAlign: 'left',
+                          transition: 'all 0.3s ease'
+                        }}
+                      />
+                    </div>
+
+                    {/* Asset URL */}
+                    <div style={{ display: 'flex', flexDirection: 'column', width: '88%', alignItems: 'flex-start', gap: '6px' }} className="gold-input">
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: '#bf953f', letterSpacing: '1px', paddingLeft: '4px' }}>Asset URL (Image)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. https://i.scdn.co/image/..."
+                        value={songAssetUrl}
+                        onChange={(e) => setSongAssetUrl(e.target.value)}
                         className="gold-field-input"
                         style={{
                           border: 'none',

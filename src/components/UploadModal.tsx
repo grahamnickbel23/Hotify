@@ -20,6 +20,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => 
   const [movieName, setMovieName] = useState('');
   const [actor, setActor] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
+  const [assetUrl, setAssetUrl] = useState('');
   const [language, setLanguage] = useState('');
   const [originCountry, setOriginCountry] = useState('');
   const [songFile, setSongFile] = useState<File | null>(null);
@@ -71,6 +72,9 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => 
     }
     if (sourceUrl.trim()) {
       formData.append('sourceUrl', sourceUrl.trim());
+    }
+    if (assetUrl.trim()) {
+      formData.append('assetUrl', assetUrl.trim());
     }
     if (language.trim()) {
       formData.append('language', language.trim());
@@ -327,6 +331,20 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => 
                 className="spotify-input"
                 style={{ marginBottom: 0 }}
                 placeholder="e.g. https://www.youtube.com/watch?v=..."
+                disabled={loading}
+              />
+            </div>
+
+            {/* Asset URL */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label className="spotify-label" style={{ marginBottom: 0 }}>Asset URL (Image)</label>
+              <input 
+                type="text" 
+                value={assetUrl} 
+                onChange={(e) => setAssetUrl(e.target.value)} 
+                className="spotify-input"
+                style={{ marginBottom: 0 }}
+                placeholder="e.g. https://i.scdn.co/image/..."
                 disabled={loading}
               />
             </div>

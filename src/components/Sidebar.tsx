@@ -1,7 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Home, Search, History, Library, Plus, Music, User, LogOut } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
 
 export const Sidebar: React.FC = () => {
   const {

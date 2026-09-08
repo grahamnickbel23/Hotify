@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const htmlBypass = (req: any, res: any, options: any) => {
+const htmlBypass = (req: any, _res: any, _options: any) => {
   if (req.headers.accept && req.headers.accept.includes('text/html')) {
     return '/index.html';
   }

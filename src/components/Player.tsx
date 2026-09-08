@@ -139,7 +139,15 @@ export const Player: React.FC = () => {
               }}
               title="View Lyrics"
             >
-              <Music size={24} />
+              {(currentSong?.assetUrl || currentSong?.coverUrl) ? (
+                <img 
+                  src={currentSong.assetUrl || currentSong.coverUrl} 
+                  alt={currentSong.title} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} 
+                />
+              ) : (
+                <Music size={24} />
+              )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               <span
