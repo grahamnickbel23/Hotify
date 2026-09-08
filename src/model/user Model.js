@@ -46,6 +46,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['user', 'admin'],
         default: 'user'
+    },
+
+    audioOut: {
+        type: String,
+        enum: ['device', 'server'],
+        default: 'device'
     }
 }, {
     timestamps: true

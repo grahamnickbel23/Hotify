@@ -112,11 +112,17 @@ export default class song {
     static async read(req, res) {
 
         // get the info
-        const { songId } = req.body;
-        if (!songId) return res.status(400).json({ success: false, message: "song id missing" });
+        const { songId, songName } = req.body;
+        if (!songId && !songName) return res.status(400).json({ success: false, message: "song id or name is missing" });
 
         // cheak if the song exisit
-        const song = await songModel.findById(songId);
+        let song = null;
+        if (songId) { 
+            song = await songModel.findById(songId); 
+        } else if (songName) { 
+            song = await songModel.findOne({ title: songName }); 
+        }
+        
         if (!song) return res.status(404).json({ success: false, message: "song not found" });
         const songData = song.toObject();
 
@@ -126,7 +132,7 @@ export default class song {
         songData.uploadedBy = [firstName, middeleName, lastName].filter(Boolean).join(" ");
 
         // search lyrics 
-        const lyrics = await lyricsModel.findOne({ songId });
+       const lyrics = await lyricsModel.findOne({ songId: song._id });
 
         // return ok if all ok
         return res.status(200).json({
