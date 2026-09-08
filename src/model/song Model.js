@@ -26,6 +26,7 @@ const songSchema = new mongoose.Schema({
         require: true
     },
     sourceUrl: String,
+    assetUrl: String,
     uploadedAudioFormat: String,
     length:{
         type: Number,
