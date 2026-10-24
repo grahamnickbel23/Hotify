@@ -160,6 +160,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // DASH player references
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playerRef = useRef<dashjs.MediaPlayerClass | null>(null);
+  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const wakeLockRef = useRef<any>(null);
+  const isAdvancingTrackRef = useRef(false);
 
   // WebSocket for server player
   const wsRef = useRef<WebSocket | null>(null);
@@ -245,6 +248,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (playerRef.current) {
         playerRef.current.reset();
       }
+      silentAudioRef.current?.pause();
       setCurrentSong(null);
       setIsPlaying(false);
     }
@@ -613,6 +617,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } else {
       if (!audioRef.current || !playerRef.current) return;
+      isAdvancingTrackRef.current = false;
+
+      // Keep mobile audio pipeline awake through silent background audio
+      if (silentAudioRef.current) {
+        silentAudioRef.current.play().catch(() => {});
+      }
+
       const manifestUrl = api.getManifestUrl(song._id);
       playerRef.current.attachSource(manifestUrl);
 
@@ -696,9 +707,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!audioRef.current) return;
       if (isPlaying) {
         audioRef.current.pause();
+        silentAudioRef.current?.pause();
         setIsPlaying(false);
       } else {
         if (currentSong) {
+          silentAudioRef.current?.play().catch(() => {});
           audioRef.current.play().catch(console.warn);
           setIsPlaying(true);
         } else if (songs.length > 0) {
@@ -796,14 +809,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     nextTrackRef.current = nextTrack;
   }, [nextTrack]);
 
+  const prevTrackRef = useRef<() => void>(prevTrack);
+  useEffect(() => {
+    prevTrackRef.current = prevTrack;
+  }, [prevTrack]);
+
+  const seekToRef = useRef<(time: number) => void>(seekTo);
+  useEffect(() => {
+    seekToRef.current = seekTo;
+  }, [seekTo]);
+
   // Stable ref for updateQualitySettings to use inside player event listeners
   const updateQualitySettingsRef = useRef(updateQualitySettings);
   useEffect(() => {
     updateQualitySettingsRef.current = updateQualitySettings;
   }, [updateQualitySettings]);
 
-  // Initialize Audio Element & dash.js
+  // Initialize Audio Element, Silent Keep-Alive for Mobile Chrome, and dash.js
   useEffect(() => {
+    // 1. Inaudible Silent Audio Keep-Alive:
+    // Mobile Chrome/Android automatically throttles or freezes background tabs the millisecond
+    // audio output ceases. A continuous inaudible silent audio loop holds the Android audio focus
+    // and keeps JavaScript/network execution 100% active between DASH track changes.
+    const silentAudio = document.createElement('audio');
+    silentAudio.id = 'hotify-silent-keepalive';
+    silentAudio.loop = true;
+    silentAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+    silentAudio.volume = 0.001;
+    document.body.appendChild(silentAudio);
+    silentAudioRef.current = silentAudio;
+
+    // 2. Primary MPEG-DASH audio element
     const audio = document.createElement('audio');
     audio.id = 'hotify-global-audio';
     audio.crossOrigin = 'anonymous'; // critical for CORS headers on manifests
@@ -811,12 +847,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     audioRef.current = audio;
 
     const player = dashjs.MediaPlayer().create();
-    player.initialize(audio, '', false);
+    player.initialize(audio, '', true); // autoPlay = true to auto-start when segments load
     playerRef.current = player;
 
     // Listeners for progress, play/pause
     const onTimeUpdate = () => {
-      setPlaybackProgress(audio.currentTime);
+      const cur = audio.currentTime;
+      setPlaybackProgress(cur);
+
+      // Synchronize MediaSession position state for system lock screen scrubber
+      if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+        const dur = audio.duration;
+        if (dur && !isNaN(dur) && dur > 0) {
+          try {
+            navigator.mediaSession.setPositionState({
+              duration: dur,
+              playbackRate: audio.playbackRate || 1,
+              position: Math.min(cur, dur)
+            });
+          } catch {
+            // Ignore position state sync conflicts
+          }
+        }
+      }
+
+      // Safeguard for DASH streams: small timestamp offsets can cause streams to stall
+      // at (duration - 0.2s) without firing the native DOM 'ended' event.
+      const dur = audio.duration;
+      if (dur > 0 && cur >= dur - 0.4 && !isAdvancingTrackRef.current) {
+        isAdvancingTrackRef.current = true;
+        console.log('DASH: Reached end threshold, auto-advancing to next track...');
+        nextTrackRef.current();
+      }
     };
 
     const onDurationChange = () => {
@@ -824,13 +886,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     const onEnded = () => {
-      // Auto-advance
-      nextTrackRef.current();
+      if (!isAdvancingTrackRef.current) {
+        isAdvancingTrackRef.current = true;
+        console.log('DASH: Native audio ended event, auto-advancing to next track...');
+        nextTrackRef.current();
+      }
+    };
+
+    const onPlaybackEnded = () => {
+      if (!isAdvancingTrackRef.current) {
+        isAdvancingTrackRef.current = true;
+        console.log('DASH: MediaPlayer PLAYBACK_ENDED event, auto-advancing to next track...');
+        nextTrackRef.current();
+      }
     };
 
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('durationchange', onDurationChange);
     audio.addEventListener('ended', onEnded);
+    player.on(dashjs.MediaPlayer.events.PLAYBACK_ENDED, onPlaybackEnded);
 
     // Apply quality settings once the stream is initialized and representations are parsed
     const onStreamInitialized = () => {
@@ -841,13 +915,97 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => {
       player.off(dashjs.MediaPlayer.events.STREAM_INITIALIZED, onStreamInitialized);
+      player.off(dashjs.MediaPlayer.events.PLAYBACK_ENDED, onPlaybackEnded);
       player.destroy();
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('durationchange', onDurationChange);
       audio.removeEventListener('ended', onEnded);
       audio.remove();
+      if (silentAudioRef.current) {
+        silentAudioRef.current.pause();
+        silentAudioRef.current.remove();
+        silentAudioRef.current = null;
+      }
     };
   }, []);
+
+  // Media Session API: Synchronize metadata with mobile lockscreen and notification drawer
+  useEffect(() => {
+    if (!('mediaSession' in navigator) || !currentSong) return;
+
+    const artistName = currentSong.firstSinger || currentSong.singer || currentSong.artist || 'Hotify Music';
+    const artworkUrl = currentSong.coverUrl || currentSong.assetUrl || '/logo-dark-bg.png';
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentSong.title,
+      artist: artistName,
+      album: currentSong.album || currentSong.albumName || currentSong.movieName || 'Hotify',
+      artwork: [
+        { src: artworkUrl, sizes: '96x96', type: 'image/png' },
+        { src: artworkUrl, sizes: '128x128', type: 'image/png' },
+        { src: artworkUrl, sizes: '192x192', type: 'image/png' },
+        { src: artworkUrl, sizes: '256x256', type: 'image/png' },
+        { src: artworkUrl, sizes: '512x512', type: 'image/png' }
+      ]
+    });
+  }, [currentSong]);
+
+  // Media Session API: Sync playbackState
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return;
+    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+  }, [isPlaying]);
+
+  // Media Session API: Register system lockscreen / notification action handlers
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return;
+
+    try {
+      navigator.mediaSession.setActionHandler('play', () => {
+        togglePlayRef.current();
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        togglePlayRef.current();
+      });
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        nextTrackRef.current();
+      });
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        prevTrackRef.current();
+      });
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (typeof details.seekTime === 'number') {
+          seekToRef.current(details.seekTime);
+        }
+      });
+    } catch (e) {
+      console.warn('Failed to register MediaSession action handlers', e);
+    }
+  }, []);
+
+  // Screen Wake Lock API: Prevent screen dimming while Hotify is open and active
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      if ('wakeLock' in navigator && isPlaying) {
+        try {
+          wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+        } catch {
+          // May fail on low battery or if document is backgrounded
+        }
+      } else if (wakeLockRef.current) {
+        wakeLockRef.current.release().catch(() => {});
+        wakeLockRef.current = null;
+      }
+    };
+    requestWakeLock();
+
+    return () => {
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release().catch(() => {});
+        wakeLockRef.current = null;
+      }
+    };
+  }, [isPlaying]);
 
   // Mount logic
   useEffect(() => {
